@@ -1,0 +1,557 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		54DDC2B62E1A1C6D00174747 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 54DDC29D2E1A1C6900174747 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 54DDC2A42E1A1C6900174747;
+			remoteInfo = FireWorkSimulator;
+		};
+		54DDC2C02E1A1C6D00174747 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 54DDC29D2E1A1C6900174747 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 54DDC2A42E1A1C6900174747;
+			remoteInfo = FireWorkSimulator;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		54DDC2A52E1A1C6900174747 /* FireWorkSimulator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FireWorkSimulator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		54DDC2B52E1A1C6D00174747 /* FireWorkSimulatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FireWorkSimulatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		54DDC2BF2E1A1C6D00174747 /* FireWorkSimulatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FireWorkSimulatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		54DDC2A72E1A1C6900174747 /* FireWorkSimulator */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FireWorkSimulator;
+			sourceTree = "<group>";
+		};
+		54DDC2B82E1A1C6D00174747 /* FireWorkSimulatorTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FireWorkSimulatorTests;
+			sourceTree = "<group>";
+		};
+		54DDC2C22E1A1C6D00174747 /* FireWorkSimulatorUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FireWorkSimulatorUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		54DDC2A22E1A1C6900174747 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54DDC2B22E1A1C6D00174747 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54DDC2BC2E1A1C6D00174747 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		54DDC29C2E1A1C6900174747 = {
+			isa = PBXGroup;
+			children = (
+				54DDC2A72E1A1C6900174747 /* FireWorkSimulator */,
+				54DDC2B82E1A1C6D00174747 /* FireWorkSimulatorTests */,
+				54DDC2C22E1A1C6D00174747 /* FireWorkSimulatorUITests */,
+				54DDC2A62E1A1C6900174747 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		54DDC2A62E1A1C6900174747 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				54DDC2A52E1A1C6900174747 /* FireWorkSimulator.app */,
+				54DDC2B52E1A1C6D00174747 /* FireWorkSimulatorTests.xctest */,
+				54DDC2BF2E1A1C6D00174747 /* FireWorkSimulatorUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		54DDC2A42E1A1C6900174747 /* FireWorkSimulator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 54DDC2C92E1A1C6D00174747 /* Build configuration list for PBXNativeTarget "FireWorkSimulator" */;
+			buildPhases = (
+				54DDC2A12E1A1C6900174747 /* Sources */,
+				54DDC2A22E1A1C6900174747 /* Frameworks */,
+				54DDC2A32E1A1C6900174747 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				54DDC2A72E1A1C6900174747 /* FireWorkSimulator */,
+			);
+			name = FireWorkSimulator;
+			packageProductDependencies = (
+			);
+			productName = FireWorkSimulator;
+			productReference = 54DDC2A52E1A1C6900174747 /* FireWorkSimulator.app */;
+			productType = "com.apple.product-type.application";
+		};
+		54DDC2B42E1A1C6D00174747 /* FireWorkSimulatorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 54DDC2CC2E1A1C6D00174747 /* Build configuration list for PBXNativeTarget "FireWorkSimulatorTests" */;
+			buildPhases = (
+				54DDC2B12E1A1C6D00174747 /* Sources */,
+				54DDC2B22E1A1C6D00174747 /* Frameworks */,
+				54DDC2B32E1A1C6D00174747 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				54DDC2B72E1A1C6D00174747 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				54DDC2B82E1A1C6D00174747 /* FireWorkSimulatorTests */,
+			);
+			name = FireWorkSimulatorTests;
+			packageProductDependencies = (
+			);
+			productName = FireWorkSimulatorTests;
+			productReference = 54DDC2B52E1A1C6D00174747 /* FireWorkSimulatorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		54DDC2BE2E1A1C6D00174747 /* FireWorkSimulatorUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 54DDC2CF2E1A1C6D00174747 /* Build configuration list for PBXNativeTarget "FireWorkSimulatorUITests" */;
+			buildPhases = (
+				54DDC2BB2E1A1C6D00174747 /* Sources */,
+				54DDC2BC2E1A1C6D00174747 /* Frameworks */,
+				54DDC2BD2E1A1C6D00174747 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				54DDC2C12E1A1C6D00174747 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				54DDC2C22E1A1C6D00174747 /* FireWorkSimulatorUITests */,
+			);
+			name = FireWorkSimulatorUITests;
+			packageProductDependencies = (
+			);
+			productName = FireWorkSimulatorUITests;
+			productReference = 54DDC2BF2E1A1C6D00174747 /* FireWorkSimulatorUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		54DDC29D2E1A1C6900174747 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					54DDC2A42E1A1C6900174747 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					54DDC2B42E1A1C6D00174747 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 54DDC2A42E1A1C6900174747;
+					};
+					54DDC2BE2E1A1C6D00174747 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 54DDC2A42E1A1C6900174747;
+					};
+				};
+			};
+			buildConfigurationList = 54DDC2A02E1A1C6900174747 /* Build configuration list for PBXProject "FireWorkSimulator" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 54DDC29C2E1A1C6900174747;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 54DDC2A62E1A1C6900174747 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				54DDC2A42E1A1C6900174747 /* FireWorkSimulator */,
+				54DDC2B42E1A1C6D00174747 /* FireWorkSimulatorTests */,
+				54DDC2BE2E1A1C6D00174747 /* FireWorkSimulatorUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		54DDC2A32E1A1C6900174747 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54DDC2B32E1A1C6D00174747 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54DDC2BD2E1A1C6D00174747 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		54DDC2A12E1A1C6900174747 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54DDC2B12E1A1C6D00174747 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54DDC2BB2E1A1C6D00174747 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		54DDC2B72E1A1C6D00174747 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 54DDC2A42E1A1C6900174747 /* FireWorkSimulator */;
+			targetProxy = 54DDC2B62E1A1C6D00174747 /* PBXContainerItemProxy */;
+		};
+		54DDC2C12E1A1C6D00174747 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 54DDC2A42E1A1C6900174747 /* FireWorkSimulator */;
+			targetProxy = 54DDC2C02E1A1C6D00174747 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		54DDC2C72E1A1C6D00174747 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		54DDC2C82E1A1C6D00174747 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		54DDC2CA2E1A1C6D00174747 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FireWorkSimulator/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = shin.FireWorkSimulator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		54DDC2CB2E1A1C6D00174747 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FireWorkSimulator/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = shin.FireWorkSimulator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		54DDC2CD2E1A1C6D00174747 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = shin.FireWorkSimulatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FireWorkSimulator.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FireWorkSimulator";
+			};
+			name = Debug;
+		};
+		54DDC2CE2E1A1C6D00174747 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = shin.FireWorkSimulatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FireWorkSimulator.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FireWorkSimulator";
+			};
+			name = Release;
+		};
+		54DDC2D02E1A1C6D00174747 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = shin.FireWorkSimulatorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FireWorkSimulator;
+			};
+			name = Debug;
+		};
+		54DDC2D12E1A1C6D00174747 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = shin.FireWorkSimulatorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = FireWorkSimulator;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		54DDC2A02E1A1C6900174747 /* Build configuration list for PBXProject "FireWorkSimulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				54DDC2C72E1A1C6D00174747 /* Debug */,
+				54DDC2C82E1A1C6D00174747 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		54DDC2C92E1A1C6D00174747 /* Build configuration list for PBXNativeTarget "FireWorkSimulator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				54DDC2CA2E1A1C6D00174747 /* Debug */,
+				54DDC2CB2E1A1C6D00174747 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		54DDC2CC2E1A1C6D00174747 /* Build configuration list for PBXNativeTarget "FireWorkSimulatorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				54DDC2CD2E1A1C6D00174747 /* Debug */,
+				54DDC2CE2E1A1C6D00174747 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		54DDC2CF2E1A1C6D00174747 /* Build configuration list for PBXNativeTarget "FireWorkSimulatorUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				54DDC2D02E1A1C6D00174747 /* Debug */,
+				54DDC2D12E1A1C6D00174747 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 54DDC29D2E1A1C6900174747 /* Project object */;
+}
