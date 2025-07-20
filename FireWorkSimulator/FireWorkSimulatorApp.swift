@@ -11,7 +11,10 @@ import SwiftUI
 struct FireWorkSimulatorApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
+                .onAppear {
+                    print("FireWorkSimulator App started successfully")
+                }
         }
     }
 }
