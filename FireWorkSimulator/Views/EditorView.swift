@@ -14,6 +14,7 @@ struct EditorView: View {
     @State private var previewRadius: CGFloat = 80.0
     @State private var showSaveAlert: Bool = false
     @State private var fireworkName: String = ""
+    @State private var is3DMode: Bool = false // 断面図/立体感のトグル
     
     enum StarTool: String, CaseIterable {
         case single, eraser, circle, spiral, grid
@@ -38,20 +39,12 @@ struct EditorView: View {
                     
                     // 花火玉の断面図（外側の円）
                     Circle()
-                        .fill(
-                            Color(
-                                red: 232 / 255,
-                                green: 165 / 255,
-                                blue: 71 / 255
-                            )
-                        )
+                        .fill(outerCircleColor)
                         .frame(width: 300, height: 300)
                     
                     // 花火玉の断面図（内側の円）
                     Circle()
-                        .fill(
-                            Color.black
-                        )
+                        .fill(Color.black)
                         .frame(width: 270, height: 270)
                     
                     // 円形配置のガイドライン
@@ -65,7 +58,8 @@ struct EditorView: View {
                     ZStack {
                         // 配置された星を表示
                         ForEach(stars) { star in
-                            StarView(star: star, isSelected: selectedStar?.id == star.id, starSize: starSize)
+                            let isSelected = selectedStar?.id == star.id
+                            StarView(star: star, isSelected: isSelected, starSize: starSize)
                                 .onTapGesture {
                                     selectedStar = star
                                 }
@@ -102,6 +96,24 @@ struct EditorView: View {
                 
                 // 下部ツールバー（ぎゅぎゅっとまとめた）
                 VStack(spacing: 8) {
+                    // 断面図/立体感トグル
+                    HStack {
+                        Text("表示モード:")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        
+                        Toggle("", isOn: $is3DMode)
+                            .toggleStyle(SwitchToggleStyle(tint: .blue))
+                            .labelsHidden()
+                        
+                        Text(is3DMode ? "立体感優先" : "断面図優先")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 8)
+                    
                     // 星配置ツール
                     HStack {
                         Text("配置ツール:")
@@ -109,11 +121,15 @@ struct EditorView: View {
                             .foregroundColor(.gray)
                         
                         ForEach(StarTool.allCases, id: \.self) { tool in
+                            let isSelected = selectedTool == tool
+                            let isCircle = tool == .circle
+                            let shouldApplyPattern = tool != .single && tool != .eraser
+                            
                             Button(action: {
                                 selectedTool = tool
-                                if tool == .circle {
+                                if isCircle {
                                     isDraggingCircle = true
-                                } else if tool != .single && tool != .eraser {
+                                } else if shouldApplyPattern {
                                     applyPatternPlacement()
                                 }
                             }) {
@@ -123,9 +139,9 @@ struct EditorView: View {
                                     Text(toolName(for: tool))
                                         .font(.caption2)
                                 }
-                                .foregroundColor(selectedTool == tool ? .blue : .gray)
+                                .foregroundColor(isSelected ? .blue : .gray)
                                 .frame(width: 50, height: 40)
-                                .background(selectedTool == tool ? Color.blue.opacity(0.2) : Color.clear)
+                                .background(isSelected ? Color.blue.opacity(0.2) : Color.clear)
                                 .cornerRadius(6)
                             }
                         }
@@ -142,12 +158,13 @@ struct EditorView: View {
                                     .foregroundColor(.gray)
                                 HStack(spacing: 4) {
                                     ForEach([3, 6, 9, 12, 15, 18], id: \.self) { size in
+                                        let isSelected = starSize == CGFloat(size)
                                         Circle()
                                             .fill(Color.black)
                                             .frame(width: CGFloat(size), height: CGFloat(size))
                                             .overlay(
                                                 Circle()
-                                                    .stroke(starSize == CGFloat(size) ? Color.blue : Color.clear, lineWidth: 1)
+                                                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 1)
                                             )
                                             .onTapGesture {
                                                 starSize = CGFloat(size)
@@ -183,12 +200,13 @@ struct EditorView: View {
                                     .foregroundColor(.gray)
                                 HStack(spacing: 4) {
                                     ForEach(presetColors.prefix(4), id: \.self) { color in
+                                        let isSelected = selectedColor == color
                                         Circle()
                                             .fill(color)
                                             .frame(width: 20, height: 20)
                                             .overlay(
                                                 Circle()
-                                                    .stroke(selectedColor == color ? Color.blue : Color.clear, lineWidth: 1)
+                                                    .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 1)
                                             )
                                             .onTapGesture {
                                                 selectedColor = color
@@ -199,12 +217,13 @@ struct EditorView: View {
                             
                             HStack(spacing: 4) {
                                 ForEach(presetColors.dropFirst(4).prefix(4), id: \.self) { color in
+                                    let isSelected = selectedColor == color
                                     Circle()
                                         .fill(color)
                                         .frame(width: 20, height: 20)
                                         .overlay(
                                             Circle()
-                                                .stroke(selectedColor == color ? Color.blue : Color.clear, lineWidth: 1)
+                                                .stroke(isSelected ? Color.blue : Color.clear, lineWidth: 1)
                                         )
                                         .onTapGesture {
                                             selectedColor = color
@@ -249,7 +268,7 @@ struct EditorView: View {
             }
             .navigationTitle("花火玉エディタ")
             .navigationBarTitleDisplayMode(.inline)
-            .alert("花火玉を保存", isPresented: $showSaveAlert) {
+            .alert("花火玉を保存", isPresent: $showSaveAlert) {
                 TextField("花火玉の名前", text: $fireworkName)
                 Button("キャンセル", role: .cancel) { }
                 Button("保存") {
@@ -268,6 +287,14 @@ struct EditorView: View {
             .red, .orange, .yellow, .purple, .pink,
             .pink, .purple, .purple
         ]
+    }
+    
+    private var outerCircleColor: Color {
+        Color(
+            red: 232 / 255,
+            green: 165 / 255,
+            blue: 71 / 255
+        )
     }
     
     private func toolIcon(for tool: StarTool) -> String {
@@ -418,7 +445,8 @@ struct EditorView: View {
             let shell = FireworkShell2D(
                 name: fireworkName,
                 stars: stars,
-                shellRadius: shellRadius
+                shellRadius: shellRadius,
+                is3DMode: is3DMode // 3Dモード設定を保存
             )
             viewModel.addShell(shell)
             stars.removeAll()
