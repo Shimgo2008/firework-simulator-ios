@@ -149,18 +149,18 @@ struct ARViewContainer: UIViewRepresentable {
             print("🚀 カスタム花火開始: \(shell.name)")
             print("📊 シェル半径: \(shell.shellRadius)")
             print("🎯 配置位置: \(position)")
-            print("🎨 表示モード: \(shell.is3DMode ? "立体感優先" : "断面図優先")")
+//            print("🎨 表示モード: \(shell.is3DMode ? "立体感優先" : "断面図優先")")
 
             // 花火玉のエンティティを作成
             let fireworkEntity = Entity()
             
-            if shell.is3DMode {
-                // 立体感優先モード：3D球体状にパーティクルを配置
-                launch3DFirework(shell: shell, at: position, fireworkEntity: fireworkEntity)
-            } else {
+//            if shell.is3DMode {
+//                // 立体感優先モード：3D球体状にパーティクルを配置
+//                launch3DFirework(shell: shell, at: position, fireworkEntity: fireworkEntity)
+//            } else {
                 // 断面図優先モード：2D断面図をそのまま3Dに投影
-                launch2DFirework(shell: shell, at: position, fireworkEntity: fireworkEntity)
-            }
+            launch2DFirework(shell: shell, at: position, fireworkEntity: fireworkEntity)
+//            }
 
             // アンカーにくっつけて配置
             let anchor = AnchorEntity(world: position)
