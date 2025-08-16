@@ -45,8 +45,8 @@ struct ShellListView: View {
             .navigationTitle("作成済み花火玉")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("保存") {
-                        viewModel.saveShellsToJSON()
+                    NavigationLink(destination: EditorView()) {
+                        Image(systemName: "pencil")
                     }
                 }
             }

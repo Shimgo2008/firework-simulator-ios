@@ -4,11 +4,14 @@ import ARKit
 import UIKit
 
 struct ARViewScreen: View {
-    @StateObject private var shellViewModel = ShellViewModel()
+    @StateObject private var shellViewModel = ShellViewModel() // ViewModelは必要
     @State private var debugDistance: Float = 20.0
     
+    // --- ステップ1: シートの表示状態を管理する@State変数を追加 ---
+    @State private var isShowingShellListView = false
+    
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             ARViewContainer(shellViewModel: shellViewModel, debugDistance: $debugDistance)
                 .edgesIgnoringSafeArea(.all)
             
@@ -32,6 +35,30 @@ struct ARViewScreen: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 50)
             }
+            
+            // フローティングアクションボタン
+            Button(action: {
+                // --- ステップ2: ボタンが押されたら状態をtrueにする ---
+                print("投稿ボタンがタップされました！")
+                self.isShowingShellListView = true
+            }) {
+                Image(systemName: "plus")
+                    .font(.title.weight(.semibold))
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .clipShape(Circle())
+                    .shadow(radius: 4, x: 0, y: 4)
+            }
+            .padding(20) // 右下の角からの余白
+        }
+        // --- ステップ3: .sheetモディファイアを追加して、状態とビューを紐付ける ---
+        .sheet(isPresented: $isShowingShellListView) {
+            ShellListView()
+                .onAppear {
+                    // このonAppearはシートが実際に表示された時に呼ばれます
+                    print("ShellListSheetViewがシートとして表示されました。")
+                }
         }
     }
 }
