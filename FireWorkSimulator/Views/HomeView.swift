@@ -9,14 +9,14 @@ struct HomeView: View {
                     .fontWeight(.bold)
                     .padding(.top, 20)
                 
-                NavigationLink(destination: EditorView()) {
-                    Text("花火玉エディタ")
-                        .font(.title2)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue.opacity(0.2))
-                        .cornerRadius(12)
-                }
+//                NavigationLink(destination: EditorView()) {
+//                    Text("花火玉エディタ")
+//                        .font(.title2)
+//                        .padding()
+//                        .frame(maxWidth: .infinity)
+//                        .background(Color.blue.opacity(0.2))
+//                        .cornerRadius(12)
+//                }
                 NavigationLink(destination: ShellListView()) {
                     Text("作成済み花火玉一覧")
                         .font(.title2)

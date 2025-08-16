@@ -1,157 +1,53 @@
 import SwiftUI
 
 struct ShellListView: View {
-    @StateObject private var viewModel = ShellViewModel()
-    @State private var searchText: String = ""
+    // ViewModelを導入し、状態管理を委任
+    @StateObject private var viewModel = ShellListViewModel()
     
     private let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.adaptive(minimum: 160)) // 画面サイズに応じて列数を調整
     ]
-    
-    var filteredShells: [(Int, FireworkShell2D)] {
-        if searchText.isEmpty {
-            return Array(viewModel.shells.enumerated())
-        } else {
-            return viewModel.shells.enumerated().filter { $0.element.name.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
     
     var body: some View {
         NavigationView {
-            VStack {
-                // 検索バー
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    TextField("花火玉名で検索", text: $searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                .padding([.horizontal, .top])
-                
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(filteredShells, id: \.0) { (index, shell) in
-                            ShellCardView(shell: shell, index: index, onDelete: {
-                                withAnimation {
-                                    viewModel.removeShell(at: index)
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(viewModel.filteredShells) { shell in
+                        ShellCardView(shell: shell)
+                            // 長押しでコンテキストメニューを表示する方式に変更
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    withAnimation {
+                                        viewModel.removeShell(shell)
+                                    }
+                                } label: {
+                                    Label("削除", systemImage: "trash")
                                 }
-                            })
-                        }
+                            }
                     }
-                    .padding()
                 }
+                .padding()
             }
             .navigationTitle("作成済み花火玉")
+            // iOS標準のモダンな検索バーに変更
+            .searchable(text: $viewModel.searchText, prompt: "花火玉名で検索")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: EditorView()) {
-                        Image(systemName: "pencil")
+                    // EditorViewにViewModelを渡してデータフローを接続
+                    NavigationLink(destination: EditorView(shellListViewModel: viewModel)) {
+                        Image(systemName: "plus")
                     }
+                }
+            }
+            // 花火玉がない場合にメッセージを表示
+            .overlay {
+                if viewModel.shells.isEmpty {
+                    Text("まだ花火玉がありません\n右上の「+」から作成しましょう")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
                 }
             }
         }
     }
 }
-
-struct ShellCardView: View {
-    let shell: FireworkShell2D
-    let index: Int
-    let onDelete: () -> Void
-    
-    let cardWidth: CGFloat = 160
-    @State private var offset: CGFloat = 0
-    @State private var isSwiping: Bool = false
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            // プレビューエリア
-            ZStack {
-                // 背景
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.black)
-                    .frame(height: 120)
-                
-                // 花火玉の断面図プレビュー
-                ZStack {
-                    // 外側の円
-                    Circle()
-                        .fill(Color(
-                            red: 232/255,
-                            green: 165/255,
-                            blue: 71/255
-                        ))
-                        .frame(width: 80, height: 80)
-                        .position(x: cardWidth/2, y: 60)
-                    
-                    // 内側の円
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: 70, height: 70)
-                        .position(x: cardWidth/2, y: 60)
-                    
-                    // 星のプレビュー
-                    let previewCenter = CGPoint(x: cardWidth/2, y: 60)
-                    let scale: CGFloat = 35.0 / 135.0
-                    ForEach(shell.stars.prefix(20)) { star in
-                        Circle()
-                            .fill(star.color)
-                            .frame(width: 3, height: 3)
-                            .position(
-                                x: previewCenter.x + star.position.x * scale,
-                                y: previewCenter.y + star.position.y * scale
-                            )
-                    }
-                }
-            }
-            
-            // 情報エリア
-            VStack(alignment: .leading, spacing: 4) {
-                Text(shell.name.isEmpty ? "花火玉 \(index + 1)" : shell.name)
-                    .font(.headline)
-                    .lineLimit(1)
-                
-                HStack {
-                    Text("星: \(shell.stars.count)")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    
-                    Spacer()
-                    
-                    Text("半径: \(String(format: "%.0f", shell.shellRadius))")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-            }
-            .padding(.horizontal, 8)
-            .padding(.bottom, 8)
-        }
-        .frame(width: cardWidth)
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .gray.opacity(0.3), radius: 4, x: 0, y: 2)
-        .offset(x: offset)
-        .gesture(
-            DragGesture()
-                .onChanged { value in
-                    if value.translation.width < 0 {
-                        offset = value.translation.width
-                        isSwiping = true
-                    }
-                }
-                .onEnded { value in
-                    if value.translation.width < -60 {
-                        onDelete()
-                    }
-                    offset = 0
-                    isSwiping = false
-                }
-        )
-    }
-}
-
-struct ShellListView_Previews: PreviewProvider {
-    static var previews: some View {
-        ShellListView()
-    }
-} 
