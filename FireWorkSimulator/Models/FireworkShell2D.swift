@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct FireworkShell2D: Codable {
+struct FireworkShell2D: Codable, Identifiable {
+    var id = UUID()
     var name: String
     var stars: [Star2D]
     var shellRadius: CGFloat
-    var is3DMode: Bool = false // 断面図/立体感の設定（デフォルトは断面図優先）
-} 
+}
