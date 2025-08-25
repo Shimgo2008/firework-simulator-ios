@@ -6,9 +6,5 @@
 	<array>
 		<dict/>
 	</array>
-	<key>NSCameraUsageDescription</key>
-	<string>This app uses the camera to provide AR fireworks experience.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app uses location information to enhance the fireworks experience.</string>
 </dict>
 </plist>
