@@ -1,3 +1,5 @@
+// Models/FireworkShell2D.swift
+
 import SwiftUI
 
 struct FireworkShell2D: Codable, Identifiable {
