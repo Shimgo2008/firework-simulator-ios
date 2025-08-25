@@ -28,8 +28,8 @@ enum CameraMode: String, CaseIterable, Identifiable {
 
 struct ARViewScreen: View {
     // ViewModelとAR体験の管理クラス
-    @StateObject private var shellViewModel = ShellViewModel()
-    private let arManager = ARManager()
+//    @StateObject private var shellViewModel = ShellViewModel()
+//    private let arManager = ARManager()
     
     // UIの状態管理
     @State private var isShowingShellListView = false
@@ -40,17 +40,40 @@ struct ARViewScreen: View {
     @GestureState private var dragOffset: CGFloat = 0
     @State private var currentOffset: CGFloat = 0
 
+    @StateObject private var viewModel = MetalViewModel()
+    @State private var arViewRef: ARView? = nil
+
     // 設定値
     private let fireworkDistance: Float = 30.0
 
     var body: some View {
         NavigationView {
             ZStack {
-               ARViewContainer(shellViewModel: shellViewModel,
-                               arManager: arManager,
-                               fireworkDistance: fireworkDistance)
-                   .edgesIgnoringSafeArea(.all)
-
+                GeometryReader { geometry in
+                    ZStack {
+                        // 1️⃣ ARViewを背景に
+                        ARViewContainer(arViewRef: $arViewRef, viewModel: viewModel)
+                            .edgesIgnoringSafeArea(.all)
+                        
+                        // 2️⃣ MetalViewをオーバーレイ
+                        MetalView(viewModel: viewModel)
+                            .edgesIgnoringSafeArea(.all)
+                            // 必要に応じてタッチイベントをMetalViewに渡す
+                    }
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                guard let arView = arViewRef else { return }
+                                if let result = arView.raycast(from: value.location,
+                                                               allowing: .estimatedPlane,
+                                                               alignment: .any).first {
+                                    let worldPosition = result.worldTransform.translation
+                                    print(worldPosition)
+                                    viewModel.touchSubject.send(worldPosition)
+                                }
+                            }
+                    )
+                }
                 VStack {
                     topBar
                     Spacer()
@@ -214,59 +237,6 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
         value = nextValue()
     }
 }
-
-// MARK: - ARViewContainer & Coordinator (変更なし)
-struct ARViewContainer: UIViewRepresentable {
-    let shellViewModel: ShellViewModel
-    let arManager: ARManager
-    let fireworkDistance: Float
-
-    func makeUIView(context: Context) -> ARView {
-        let arView = ARView(frame: .zero)
-        let config = ARWorldTrackingConfiguration()
-        config.planeDetection = [.horizontal]
-        arView.session.run(config)
-        
-        arManager.setup(with: arView)
-        context.coordinator.arManager = arManager
-        context.coordinator.shellViewModel = shellViewModel
-        
-        // 画面タップで花火を打ち上げるジェスチャー
-        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
-        arView.addGestureRecognizer(tapGesture)
-        
-        return arView
-    }
-
-    func updateUIView(_ uiView: ARView, context: Context) {
-        context.coordinator.fireworkDistance = fireworkDistance
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    class Coordinator: NSObject {
-        var arManager: ARManager?
-        var shellViewModel: ShellViewModel?
-        var fireworkDistance: Float = 30.0
-
-        @objc func handleTap(_ sender: UITapGestureRecognizer) {
-            guard let arView = sender.view as? ARView else { return }
-            
-            let cameraTransform = arView.cameraTransform
-            let cameraForward = SIMD3<Float>(-cameraTransform.matrix.columns.2.x, -cameraTransform.matrix.columns.2.y, -cameraTransform.matrix.columns.2.z)
-            let fireworkPosition = cameraTransform.translation + cameraForward * fireworkDistance
-            
-            if let randomShell = shellViewModel?.shells.randomElement() {
-                arManager?.launchFirework(shell: randomShell, at: fireworkPosition)
-            } else {
-                arManager?.launchDefaultFirework(at: fireworkPosition)
-            }
-        }
-    }
-}
-
 
 // MARK: - Preview
 struct ARViewScreen_Previews: PreviewProvider {
