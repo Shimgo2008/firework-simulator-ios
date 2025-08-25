@@ -1,23 +1,21 @@
 import SwiftUI
 
 struct EditorView: View {
-    // 1. プロパティ名を明確に分離
+
     // ShellListViewから渡される、一覧を管理するViewModel
     @ObservedObject var shellListViewModel: ShellListViewModel
-    
+
     // このView内だけで使う、エディタの状態を管理するViewModel
     @StateObject private var editorViewModel = EditorViewModel()
-    
+
     // 保存後に画面を閉じるためのプロパティ
     @Environment(\.presentationMode) var presentationMode
-    
-    // --- (以下、変更なし) ---
+
     private let canvasSize: CGFloat = 300
     private var canvasRadius: CGFloat { canvasSize / 2 }
 
     var body: some View {
         // 2. viewModel -> editorViewModel に変更
-        // View内のすべてのプロパティ参照を`editorViewModel`に修正します
         VStack(spacing: 0) {
             Spacer()
             canvasView
@@ -203,7 +201,7 @@ struct EditorView: View {
             TextField("花火玉の名前", text: $editorViewModel.fireworkName)
             Button("キャンセル", role: .cancel) { }
             Button("保存") {
-                saveFireworkShell() // <<<--- 修正済みの保存メソッドを呼ぶ
+                saveFireworkShell()
             }
         }
     }
