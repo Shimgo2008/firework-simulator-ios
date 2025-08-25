@@ -1,8 +1,8 @@
+// Models/Star2D.swift
+
 import SwiftUI
 
 // MARK: - Codable Helpers
-// SwiftUIのColor型をCodableにするためのヘルパー
-// 内部でUIColorに変換し、信頼性の高いRGBA値を取得して保存します。
 struct CodableColor: Codable {
     var red: Double
     var green: Double

@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ShellListView: View {
-    // ViewModelを導入し、状態管理を委任
     @StateObject private var viewModel = ShellListViewModel()
     
     private let columns = [
@@ -14,7 +13,6 @@ struct ShellListView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.filteredShells) { shell in
                         ShellCardView(shell: shell)
-                            // 長押しでコンテキストメニューを表示する方式に変更
                             .contextMenu {
                                 Button(role: .destructive) {
                                     withAnimation {
