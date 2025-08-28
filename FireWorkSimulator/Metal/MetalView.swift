@@ -1,6 +1,6 @@
 //
 //  MetalView.swift
-//  metalbenkyo-ios
+//  FireWorkSimulator
 //
 //  Created by 岩澤慎平 on 2025/08/17.
 //

@@ -3,13 +3,11 @@ import RealityKit
 import ARKit
 
 // MARK: - Haptic Feedback Manager
-/// ハプティックフィードバック（振動）を管理するシンプルなヘルパー
 struct HapticManager {
     static let shared = HapticManager()
     private let generator = UIImpactFeedbackGenerator(style: .medium)
     private init() {} // Singleton
 
-    /// 中程度の強さの振動を発生させる
     func impact() {
         generator.impactOccurred()
     }
@@ -20,16 +18,12 @@ struct HapticManager {
 enum CameraMode: String, CaseIterable, Identifiable {
     case photo = "写真"
     case video = "ビデオ"
-    // 将来的に「スロー」「タイムラプス」などを追加可能
     
     var id: String { self.rawValue }
 }
 
 
 struct ARViewScreen: View {
-    // ViewModelとAR体験の管理クラス
-//    @StateObject private var shellViewModel = ShellViewModel()
-//    private let arManager = ARManager()
     
     // UIの状態管理
     @State private var isShowingShellListView = false
@@ -43,6 +37,10 @@ struct ARViewScreen: View {
     @StateObject private var viewModel = MetalViewModel()
     @State private var arViewRef: ARView? = nil
 
+    // 花火玉リストの管理
+    @StateObject private var shellListViewModel = ShellListViewModel()
+    @State private var selectedShell: FireworkShell2D?
+
     // 設定値
     private let fireworkDistance: Float = 30.0
 
@@ -50,6 +48,7 @@ struct ARViewScreen: View {
         NavigationView {
             ZStack {
                 GeometryReader { geometry in
+                    // このZStackがARViewとMetalViewを重ねている、画面の本体です
                     ZStack {
                         // 1️⃣ ARViewを背景に
                         ARViewContainer(arViewRef: $arViewRef, viewModel: viewModel)
@@ -58,18 +57,49 @@ struct ARViewScreen: View {
                         // 2️⃣ MetalViewをオーバーレイ
                         MetalView(viewModel: viewModel)
                             .edgesIgnoringSafeArea(.all)
-                            // 必要に応じてタッチイベントをMetalViewに渡す
                     }
                     .gesture(
                         DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                guard let arView = arViewRef else { return }
-                                if let result = arView.raycast(from: value.location,
-                                                               allowing: .estimatedPlane,
-                                                               alignment: .any).first {
-                                    let worldPosition = result.worldTransform.translation
-                                    print(worldPosition)
-                                    viewModel.touchSubject.send(worldPosition)
+                            .onEnded { value in
+                                guard let arView = arViewRef, let shell = selectedShell else { return }
+                                
+                                if let result = arView.raycast(from: value.location, allowing: .estimatedPlane, alignment: .any).first {
+                                    
+                                    // --- ここからが追加・変更ロジック ---
+                                    
+                                    // 1. タップされたAR空間上の座標を取得
+                                    let tappedPosition = result.worldTransform.translation
+                                    
+                                    // 2. 現在のカメラの位置を取得
+                                    let cameraPosition = arView.cameraTransform.matrix.translation
+                                    
+                                    // 3. 花火を打ち上げるための最低距離を定義（例: 15メートル）
+                                    let minLaunchDistance: Float = 15.0
+                                    
+                                    // 4. カメラからタップ地点までの距離を計算
+                                    let vectorFromCamera = tappedPosition - cameraPosition
+                                    let distance = length(vectorFromCamera)
+                                    
+                                    var finalLaunchPosition = tappedPosition
+                                    
+                                    // 5. もし計算した距離が最低距離より近かった場合...
+                                    if distance < minLaunchDistance {
+                                        // カメラからの方向ベクトルを計算
+                                        let direction = normalize(vectorFromCamera)
+                                        
+                                        // カメラの位置から、最低距離だけ離れた新しい位置を計算
+                                        let pushedBackPosition = cameraPosition + direction * minLaunchDistance
+                                        
+                                        // XとZ座標は新しい位置のものを採用し、
+                                        // Y座標（高さ）は元のタップ地点（地面の高さ）を維持する
+                                        finalLaunchPosition.x = pushedBackPosition.x
+                                        finalLaunchPosition.z = pushedBackPosition.z
+                                    }
+                                    
+                                    // 6. 最終的に決定した打ち上げ位置をViewModelに送信
+                                    viewModel.launchSubject.send((shell, finalLaunchPosition))
+                                    
+                                    // --- ここまで ---
                                 }
                             }
                     )
@@ -84,9 +114,10 @@ struct ARViewScreen: View {
         }
         .navigationViewStyle(.stack)
         .sheet(isPresented: $isShowingShellListView) {
-            ShellListView()
+            ShellListView(selectedShell: $selectedShell)
         }
     }
+
 
     // MARK: - UI Components
 
@@ -188,12 +219,20 @@ struct ARViewScreen: View {
 
     private var shellListButton: some View {
         Button(action: { isShowingShellListView = true }) {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.white, lineWidth: 2)
-                .background(Color.black.opacity(0.5))
-                .overlay(Image(systemName: "sparkles").foregroundColor(.white).font(.title2))
+            // selectedShellがnilでなければプレビューを、nilならデフォルトアイコンを表示
+            if let shell = selectedShell {
+                FireworkPreview(shell: shell) // 新しく作るプレビュービュー
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.white, lineWidth: 2)
+                        .background(Color.black.opacity(0.5))
+                    Image(systemName: "sparkles").foregroundColor(.white).font(.title2)
+                }
+            }
         }
         .frame(width: 50, height: 50)
+        .clipShape(RoundedRectangle(cornerRadius: 8)) // .clipShapeで形を整える
     }
     
     private var photoShutterButton: some View {
@@ -235,6 +274,30 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
         value = nextValue()
+    }
+}
+
+struct FireworkPreview: View {
+    let shell: FireworkShell2D
+    private let previewDiameter: CGFloat = 40
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.black.opacity(0.8))
+
+            let scale = (previewDiameter / 2) / 150.0
+            
+            ForEach(shell.stars) { star in
+                Circle()
+                    .fill(star.color)
+                    .frame(width: star.size * scale, height: star.size * scale)
+                    .position(
+                        x: 25 + star.position.x * scale, // 50x50のビューの中心に合わせる
+                        y: 25 + star.position.y * scale
+                    )
+            }
+        }
     }
 }
 
