@@ -116,16 +116,16 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     // 新しいパーティクルの配列を返すように変更
     private func explode(at position: SIMD3<Float>, shell: FireworkShell2D) -> [Particle] {
         var newStars: [Particle] = []
-        let explosionSpeed: Float = 4.0 // 爆発の勢いを少し強く
+        let explosionSpeed: Float = 5.0 // 爆発の勢いを少し強く
         
         for star2d in shell.stars {
             let baseVelocity = SIMD3<Float>(
                 Float(star2d.position.x / 150.0), // キャンバス半径で正規化
                 Float(star2d.position.y / 150.0),
-                Float.random(in: -0.5...0.5) // Z軸にも広がりを持たせる
+                Float.random(in: -1.0...1.0) * (length(SIMD2(x: Float(star2d.position.x), y: Float(star2d.position.y))) / 150.0) // Z軸にも広がりを持たせる
             )
             
-            let normalizedVelocity = normalize(baseVelocity) * explosionSpeed
+            let velocity = baseVelocity * explosionSpeed * Float.random(in: 0.8...1.2)
             
             let uiColor = UIColor(star2d.color)
             var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
@@ -133,10 +133,10 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
             
             let newStar = Particle(
                 position: position,
-                velocity: normalizedVelocity,
+                velocity: velocity,
                 color: SIMD4<Float>(Float(r), Float(g), Float(b), Float(a)),
                 size: Float(star2d.size / 60.0),
-                lifetime: 2.0,
+                lifetime: 2.5,
                 type: .star
             )
             newStars.append(newStar)
@@ -161,7 +161,26 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
                 // 生きているパーティクルの物理演算
                 if particle.type == .star {
                     particle.velocity += gravity * deltaTime
+                    
+                    particle.trailEmissionTimer -= deltaTime
+                    if particle.trailEmissionTimer <= 0{
+                        let trail = Particle(
+                            position: particle.position,
+                            velocity: .zero,
+                            color: particle.color,
+                            size: particle.size * 0.5,
+                            lifetime: 0.5,
+                            type: .trail
+                        )
+                        nextFrameParticles.append(trail)
+                        particle.trailEmissionTimer = 0.008
+                    }
                 }
+                
+                if particle.type == .riser{
+                    particle.velocity += gravity * deltaTime * 0.1
+                }
+
                 particle.position += particle.velocity * deltaTime
                 nextFrameParticles.append(particle)
             } else {
