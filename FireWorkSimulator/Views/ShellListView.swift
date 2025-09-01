@@ -2,7 +2,9 @@ import SwiftUI
 
 struct ShellListView: View {
     @StateObject private var viewModel = ShellListViewModel()
-    
+    @Environment(\.presentationMode) var presentationMode
+
+    @Binding var selectedShell: FireworkShell2D?
     private let columns = [
         GridItem(.adaptive(minimum: 160)) // 画面サイズに応じて列数を調整
     ]
@@ -13,6 +15,11 @@ struct ShellListView: View {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(viewModel.filteredShells) { shell in
                         ShellCardView(shell: shell)
+                            .onTapGesture {
+                                // 花火玉が選択されたらモーダルを閉じる
+                                self.selectedShell = shell
+                                presentationMode.wrappedValue.dismiss()
+                            }
                             .contextMenu {
                                 Button(role: .destructive) {
                                     withAnimation {

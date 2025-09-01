@@ -1,83 +1,61 @@
 //
 //  MetalKitData.swift
-//  metalbenkyo-ios
+//  FireWorkSimulator
 //
 //  Created by 岩澤慎平 on 2025/08/19.
 //
 
 import simd
-import Foundation // sin, cosなどの数学関数を利用するため
+import Foundation
 
 // MARK: - Data Structures
 
-/// GPUに送る頂点データの構造。シェーダー側の`Vertex`と一致させる必要がある。
 struct Vertex {
     var position: SIMD4<Float>
     var color: SIMD4<Float>
-    var normal: SIMD3<Float>
+
+    var texCoord: SIMD2<Float>
 }
 
-/// GPUに送るユニフォームデータの構造。シェーダー側の`Uniforms`と一致させる。
 struct Uniforms {
     var mvpMatrix: simd_float4x4
 }
 
-/// 描画する直方体オブジェクトのプロパティを保持する構造体。
-struct Cuboid {
-    // オブジェクトの状態
+struct Particle {
     var position: SIMD3<Float>
-    var rotation: SIMD3<Float>
-    var dimensions: SIMD3<Float> // (width, height, depth)
+    var velocity: SIMD3<Float>
     var color: SIMD4<Float>
-    
-    // アニメーション用の寿命
+    var size: Float
     var lifetime: Float
     
-    /// このオブジェクトのトランスフォーム（スケール、回転、平行移動）を反映したモデル行列を計算して返す。
-    func modelMatrix() -> simd_float4x4 {
-        // 1. スケーリング行列
-        let scalingMatrix = simd_float4x4(
-            SIMD4<Float>(dimensions.x, 0, 0, 0),
-            SIMD4<Float>(0, dimensions.y, 0, 0),
-            SIMD4<Float>(0, 0, dimensions.z, 0),
-            SIMD4<Float>(0, 0, 0, 1)
-        )
-        
-        // 2. 回転行列
-        let rotX = rotation.x, rotY = rotation.y, rotZ = rotation.z
-        let rotationXMatrix = simd_float4x4(
-            SIMD4<Float>(1, 0, 0, 0),
-            SIMD4<Float>(0, cos(rotX), sin(rotX), 0),
-            SIMD4<Float>(0, -sin(rotX), cos(rotX), 0),
-            SIMD4<Float>(0, 0, 0, 1)
-        )
-        let rotationYMatrix = simd_float4x4(
-            SIMD4<Float>(cos(rotY), 0, -sin(rotY), 0),
-            SIMD4<Float>(0, 1, 0, 0),
-            SIMD4<Float>(sin(rotY), 0, cos(rotY), 0),
-            SIMD4<Float>(0, 0, 0, 1)
-        )
-        let rotationZMatrix = simd_float4x4(
-            SIMD4<Float>(cos(rotZ), sin(rotZ), 0, 0),
-            SIMD4<Float>(-sin(rotZ), cos(rotZ), 0, 0),
-            SIMD4<Float>(0, 0, 1, 0),
-            SIMD4<Float>(0, 0, 0, 1)
-        )
-        
-        // 3. 平行移動行列
-        let translationMatrix = simd_float4x4(
-            SIMD4<Float>(1, 0, 0, 0),
-            SIMD4<Float>(0, 1, 0, 0),
-            SIMD4<Float>(0, 0, 1, 0),
-            SIMD4<Float>(position.x, position.y, position.z, 1)
-        )
-        
-        // 行列を結合: スケール -> 回転 -> 移動 の順で乗算する
-        return translationMatrix * rotationZMatrix * rotationYMatrix * rotationXMatrix * scalingMatrix
+    // この粒子が上昇中の玉か、爆発後の星かを区別するのに使える
+    enum ParticleType {
+        case riser     // 上昇中の玉
+        case star      // 爆発後の星
+        case trail
     }
+    var type: ParticleType
+    
+    // もし上昇中の玉(riser)なら、どの花火玉の情報を持っているか
+    var shellPayload: FireworkShell2D? = nil
+    
+    var trailEmissionTimer: Float = .zero
 }
 
-
+// 頂点データを作る関数Particle用に変更
+// makeParticleVertices関数も変更
+func makeParticleVertices(size: Float) -> [Vertex] {
+    let halfSize = size / 2.0
+    
+    // 各頂点にtexCoordを追加する
+    let v0 = Vertex(position: .init(-halfSize, -halfSize, 0, 1), color: .init(1,1,1,1), texCoord: .init(-0.5, -0.5))
+    let v1 = Vertex(position: .init( halfSize, -halfSize, 0, 1), color: .init(1,1,1,1), texCoord: .init( 0.5, -0.5))
+    let v2 = Vertex(position: .init(-halfSize,  halfSize, 0, 1), color: .init(1,1,1,1), texCoord: .init(-0.5,  0.5))
+    let v3 = Vertex(position: .init( halfSize,  halfSize, 0, 1), color: .init(1,1,1,1), texCoord: .init( 0.5,  0.5))
+    
+    // 2つの三角形で四角形を構成
+    return [v0, v1, v2, v1, v3, v2]
+}
 // MARK: - Helper Functions
 
 /// 3D空間に遠近感を与えるための射影行列（Perspective Projection Matrix）を生成する。
@@ -113,44 +91,4 @@ func makeLookAt(eye: SIMD3<Float>, center: SIMD3<Float>, up: SIMD3<Float>) -> si
             SIMD4<Float>(t.x, t.y, t.z, 1)
         )
     )
-}
-
-/// 指定されたCuboidオブジェクトから、原点中心の頂点データを生成する。
-func makeCuboidVertices(from cuboid: Cuboid) -> [Vertex] {
-    print("makeCuboidVertices")
-    let hx: Float = 0.5, hy: Float = 0.5, hz: Float = 0.5
-    
-    let v000 = SIMD4<Float>(-hx, -hy, -hz, 1), v001 = SIMD4<Float>(-hx, -hy,  hz, 1)
-    let v010 = SIMD4<Float>(-hx,  hy, -hz, 1), v011 = SIMD4<Float>(-hx,  hy,  hz, 1)
-    let v100 = SIMD4<Float>( hx, -hy, -hz, 1), v101 = SIMD4<Float>( hx, -hy,  hz, 1)
-    let v110 = SIMD4<Float>( hx,  hy, -hz, 1), v111 = SIMD4<Float>( hx,  hy,  hz, 1)
-    
-    let color = cuboid.color
-    
-    // MARK: - 各面の法線を定義
-    let frontNormal = SIMD3<Float>(0, 0, 1), backNormal = SIMD3<Float>(0, 0, -1)
-    let leftNormal  = SIMD3<Float>(-1, 0, 0), rightNormal = SIMD3<Float>(1, 0, 0)
-    let topNormal   = SIMD3<Float>(0, 1, 0), bottomNormal = SIMD3<Float>(0, -1, 0)
-    
-    // MARK: - Vertexに法線情報を追加
-    return [
-        // 前面
-        Vertex(position: v101, color: color, normal: frontNormal), Vertex(position: v001, color: color, normal: frontNormal), Vertex(position: v011, color: color, normal: frontNormal),
-        Vertex(position: v101, color: color, normal: frontNormal), Vertex(position: v011, color: color, normal: frontNormal), Vertex(position: v111, color: color, normal: frontNormal),
-        // 背面
-        Vertex(position: v100, color: color, normal: backNormal), Vertex(position: v110, color: color, normal: backNormal), Vertex(position: v010, color: color, normal: backNormal),
-        Vertex(position: v100, color: color, normal: backNormal), Vertex(position: v010, color: color, normal: backNormal), Vertex(position: v000, color: color, normal: backNormal),
-        // 左面
-        Vertex(position: v000, color: color, normal: leftNormal), Vertex(position: v010, color: color, normal: leftNormal), Vertex(position: v011, color: color, normal: leftNormal),
-        Vertex(position: v000, color: color, normal: leftNormal), Vertex(position: v011, color: color, normal: leftNormal), Vertex(position: v001, color: color, normal: leftNormal),
-        // 右面
-        Vertex(position: v100, color: color, normal: rightNormal), Vertex(position: v101, color: color, normal: rightNormal), Vertex(position: v111, color: color, normal: rightNormal),
-        Vertex(position: v100, color: color, normal: rightNormal), Vertex(position: v111, color: color, normal: rightNormal), Vertex(position: v110, color: color, normal: rightNormal),
-        // 上面
-        Vertex(position: v010, color: color, normal: topNormal), Vertex(position: v110, color: color, normal: topNormal), Vertex(position: v111, color: color, normal: topNormal),
-        Vertex(position: v010, color: color, normal: topNormal), Vertex(position: v111, color: color, normal: topNormal), Vertex(position: v011, color: color, normal: topNormal),
-        // 底面
-        Vertex(position: v000, color: color, normal: bottomNormal), Vertex(position: v001, color: color, normal: bottomNormal), Vertex(position: v101, color: color, normal: bottomNormal),
-        Vertex(position: v000, color: color, normal: bottomNormal), Vertex(position: v101, color: color, normal: bottomNormal), Vertex(position: v100, color: color, normal: bottomNormal)
-    ]
 }
