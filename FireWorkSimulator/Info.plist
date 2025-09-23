@@ -6,5 +6,9 @@
 	<array>
 		<dict/>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>AR体験のためにカメラを使用します。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>撮影した写真をカメラロールに保存するために必要です。</string>
 </dict>
 </plist>
