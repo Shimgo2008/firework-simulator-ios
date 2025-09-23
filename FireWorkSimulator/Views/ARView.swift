@@ -29,7 +29,7 @@ struct ARViewScreen: View {
     @State private var isShowingShellListView = false
     @State private var isRecording = false
     @State private var selectedMode: CameraMode = .photo
-    
+
     // --- ジェスチャーとUI計算用の状態変数 ---
     @GestureState private var dragOffset: CGFloat = 0
     @State private var currentOffset: CGFloat = 0
@@ -40,6 +40,9 @@ struct ARViewScreen: View {
     // 花火玉リストの管理
     @StateObject private var shellListViewModel = ShellListViewModel()
     @State private var selectedShell: FireworkShell2D?
+
+    // カメラキャプチャ管理
+    private let cameraCapture = CameraCapture()
 
     // 設定値
     private let fireworkDistance: Float = 30.0
@@ -238,7 +241,10 @@ struct ARViewScreen: View {
     private var photoShutterButton: some View {
         Button(action: {
             HapticManager.shared.impact()
-            print("📸 写真を撮影しました！")
+            if let arView = arViewRef {
+                cameraCapture.capturePhoto(from: arView)
+            }
+            print("📸 写真を撮影してカメラロールに保存しました！")
         }) {
             ZStack {
                 Circle().stroke(Color.white, lineWidth: 4)
@@ -252,12 +258,13 @@ struct ARViewScreen: View {
         Button(action: {
             HapticManager.shared.impact()
             withAnimation(.spring()) { isRecording.toggle() }
-            
+            cameraCapture.startRunning()
+            // 動画録画処理（CameraCaptureにメソッド追加予定）
+            // if isRecording { cameraCapture.startRecording() } else { cameraCapture.stopRecording() }
             if isRecording { print("🔴 録画開始") } else { print("⏹️ 録画停止") }
         }) {
             ZStack {
                 Circle().stroke(Color.white, lineWidth: 4)
-                
                 if isRecording {
                     RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 25, height: 25)
                 } else {
