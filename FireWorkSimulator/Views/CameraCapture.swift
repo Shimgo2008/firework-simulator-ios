@@ -13,7 +13,7 @@ class CameraCapture: NSObject {
 
             guard let image = screenshot else { return }
 
-            // 2. 必要ならクロップ（ここでは全体を保存。範囲指定は後で拡張可能）
+            // 2. 必要ならクロップ(ここでは全体を保存。範囲指定は後で拡張可能)
             // let croppedImage = cropToCameraArea(image)
 
             DispatchQueue.global(qos: .userInitiated).async {
@@ -22,7 +22,7 @@ class CameraCapture: NSObject {
         }
     }
 
-    // クロップ処理（必要なら実装）
+    // クロップ処理(必要なら実装)
     // private func cropToCameraArea(_ image: UIImage) -> UIImage { ... }
     private let session = AVCaptureSession()
     private var videoOutput: AVCaptureVideoDataOutput?

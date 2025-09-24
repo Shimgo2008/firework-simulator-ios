@@ -8,14 +8,12 @@ struct EditorView: View {
     // このView内だけで使う、エディタの状態を管理するViewModel
     @StateObject private var editorViewModel = EditorViewModel()
 
-    // 保存後に画面を閉じるためのプロパティ
     @Environment(\.presentationMode) var presentationMode
 
     private let canvasSize: CGFloat = 300
     private var canvasRadius: CGFloat { canvasSize / 2 }
 
     var body: some View {
-        // 2. viewModel -> editorViewModel に変更
         VStack(spacing: 0) {
             Spacer()
             canvasView
@@ -32,7 +30,7 @@ struct EditorView: View {
         .alert("キャンバスをクリア", isPresented: $editorViewModel.showClearAlert) { clearAlertView } message: {
             Text("すべての星を削除しますか？この操作は取り消せません。")
         }
-        .interactiveDismissDisabled() // 下スワイプで閉じないように設定
+        .interactiveDismissDisabled()
     }
 
     // MARK: - Canvas View
@@ -53,6 +51,7 @@ struct EditorView: View {
         .frame(width: canvasSize, height: canvasSize)
         .contentShape(Rectangle())
         .onTapGesture { location in handleCanvasTap(at: location) }
+        // このwarnは無視して大丈夫
         .onChange(of: editorViewModel.selectedTool) { _ in editorViewModel.updatePreview(canvasSize: canvasSize) }
         .onChange(of: editorViewModel.spacing) { _ in editorViewModel.updatePreview(canvasSize: canvasSize) }
         .onChange(of: editorViewModel.previewRadius) { _ in editorViewModel.updatePreview(canvasSize: canvasSize) }
