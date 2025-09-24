@@ -24,6 +24,8 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     private var viewMatrix: simd_float4x4 = matrix_identity_float4x4
     private var projectionMatrix: simd_float4x4 = matrix_identity_float4x4
 
+    private var vertexBuffer: MTLBuffer?
+
     // MARK: - Initializer
     
     init(viewModel: MetalViewModel) {
@@ -68,6 +70,10 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         depthDescriptor.depthCompareFunction = .less
         depthDescriptor.isDepthWriteEnabled = false // 半透明オブジェクトを描画するため、深度書き込みをオフにする
         depthState = device.makeDepthStencilState(descriptor: depthDescriptor)
+        
+        // 頂点バッファを作成（四角形の6頂点）
+        let vertices = makeParticleVertices(size: 1.0)
+        vertexBuffer = device.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.stride * vertices.count, options: [])
     }
     
     // MARK: - Event Handling
@@ -206,7 +212,8 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         encoder.setRenderPipelineState(pipelineState!)
         encoder.setDepthStencilState(depthState!)
 
-        // 各Particleを描画
+        // インスタンスデータを作成
+        var instances: [ParticleInstance] = []
         for particle in particles {
             // Particleの位置を表す平行移動行列
             let translationMatrix = simd_float4x4(translation: particle.position)
@@ -216,19 +223,24 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
             cameraRotation.columns.3 = SIMD4<Float>(0, 0, 0, 1) // カメラの移動成分を消去
             let billboardMatrix = cameraRotation.inverse
             
-            let modelMatrix = translationMatrix * billboardMatrix
+            // サイズのスケーリング行列
+            let scaleMatrix = simd_float4x4(scale: SIMD3<Float>(particle.size, particle.size, 1.0))
             
-            var uniforms = Uniforms(mvpMatrix: self.projectionMatrix * self.viewMatrix * modelMatrix)
-            encoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 1)
+            let modelMatrix = translationMatrix * billboardMatrix * scaleMatrix
+            
+            let instance = ParticleInstance(modelMatrix: modelMatrix, color: particle.color)
+            instances.append(instance)
+        }
 
-            let vertices = makeParticleVertices(size: particle.size)
-            // Particle固有の色を適用
-            let coloredVertices = vertices.map { Vertex(position: $0.position, color: particle.color, texCoord: $0.texCoord) }
+        if !instances.isEmpty {
+            let instanceBuffer = device.makeBuffer(bytes: instances, length: MemoryLayout<ParticleInstance>.stride * instances.count, options: [])
             
-            let vertexBuffer = device.makeBuffer(bytes: coloredVertices, length: MemoryLayout<Vertex>.stride * coloredVertices.count, options: [])
+            var uniforms = Uniforms(mvpMatrix: projectionMatrix * viewMatrix)
             encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
+            encoder.setVertexBuffer(instanceBuffer, offset: 0, index: 1)
+            encoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 2)
             
-            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices.count)
+            encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6, instanceCount: instances.count)
         }
 
         encoder.endEncoding()
@@ -245,6 +257,15 @@ extension simd_float4x4 {
             SIMD4<Float>(0, 1, 0, 0),
             SIMD4<Float>(0, 0, 1, 0),
             SIMD4<Float>(translation.x, translation.y, translation.z, 1)
+        )
+    }
+    
+    init(scale: SIMD3<Float>) {
+        self.init(
+            SIMD4<Float>(scale.x, 0, 0, 0),
+            SIMD4<Float>(0, scale.y, 0, 0),
+            SIMD4<Float>(0, 0, scale.z, 0),
+            SIMD4<Float>(0, 0, 0, 1)
         )
     }
 }

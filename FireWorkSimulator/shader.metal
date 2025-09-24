@@ -14,6 +14,11 @@ struct Uniforms {
     float4x4 mvpMatrix;
 };
 
+struct ParticleInstance {
+    float4x4 modelMatrix;
+    float4 color;
+};
+
 // MARK: フラグメントシェーダーに渡すデータ
 struct VertexOut {
     float4 position [[position]];
@@ -22,12 +27,14 @@ struct VertexOut {
 };
 
 vertex VertexOut vertex_main(const device Vertex* vertices [[buffer(0)]],
-                             const device Uniforms& uniforms [[buffer(1)]],
-                             uint vertexID [[vertex_id]]) {
+                             const device ParticleInstance* instances [[buffer(1)]],
+                             const device Uniforms& uniforms [[buffer(2)]],
+                             uint vertexID [[vertex_id]],
+                             uint instanceID [[instance_id]]) {
     VertexOut out;
     
-    out.position = uniforms.mvpMatrix * vertices[vertexID].position;
-    out.color = vertices[vertexID].color;
+    out.position = uniforms.mvpMatrix * instances[instanceID].modelMatrix * vertices[vertexID].position;
+    out.color = instances[instanceID].color;
     out.texCoord = vertices[vertexID].texCoord; // texCoordをそのまま渡す
 
     return out;
