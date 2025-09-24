@@ -28,7 +28,7 @@ class EditorViewModel: ObservableObject {
 
     // MARK: - Enums
     enum StarTool: String, CaseIterable, Identifiable {
-        case single, eraser, circle, spiral, grid
+        case  circle, single, eraser, spiral, grid
         var id: String { self.rawValue }
     }
 
@@ -149,7 +149,6 @@ class EditorViewModel: ObservableObject {
     // MARK: - Save and Clear Methods
     
     /// 現在のキャンバスの状態からFireworkShellオブジェクトを生成し、状態をリセットする
-    /// - Returns: 生成されたFireworkShell2Dオブジェクト。名が空の場合はnil。
     func createAndClearShell() -> FireworkShell2D? {
         guard !fireworkName.isEmpty else { return nil }
         

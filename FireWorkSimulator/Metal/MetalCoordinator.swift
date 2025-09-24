@@ -14,7 +14,7 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     private var depthState: MTLDepthStencilState?
     
     private var particles: [Particle] = []
-    private let gravity = SIMD3<Float>(0, -2.5, 0) // 重力を少し強く
+    private let gravity = SIMD3<Float>(0, -2.5, 0)
     
     private var viewModel: MetalViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -49,8 +49,6 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         pipelineDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         pipelineDescriptor.depthAttachmentPixelFormat = .depth32Float
         
-        // MARK: - 修正点2: アルファブレンディングを有効化
-        // これがないと、シェーダーで計算した透明度が反映されず、ただの四角形になる
         let colorAttachment = pipelineDescriptor.colorAttachments[0]!
         colorAttachment.isBlendingEnabled = true
         colorAttachment.rgbBlendOperation = .add
@@ -112,11 +110,10 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         parentView?.setNeedsDisplay()
     }
 
-    // MARK: - 修正点3: 爆発ロジックの修正
     // 新しいパーティクルの配列を返すように変更
     private func explode(at position: SIMD3<Float>, shell: FireworkShell2D) -> [Particle] {
         var newStars: [Particle] = []
-        let explosionSpeed: Float = 5.0 // 爆発の勢いを少し強く
+        let explosionSpeed: Float = 5.0 // 爆発の勢いを調整する定数
         
         for star2d in shell.stars {
             let baseVelocity = SIMD3<Float>(
@@ -152,7 +149,6 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         let deltaTime: Float = 1.0 / 60.0
         
         // --- 物理シミュレーション ---
-        // MARK: - 修正点3: 寿命と爆発の管理ロジックを修正
         var nextFrameParticles: [Particle] = []
         for var particle in particles {
             particle.lifetime -= deltaTime
@@ -215,7 +211,6 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
             // Particleの位置を表す平行移動行列
             let translationMatrix = simd_float4x4(translation: particle.position)
             
-            // MARK: - 修正点1: 正しいビルボード行列の計算
             // カメラの回転を打ち消し、常に正面を向くようにする
             var cameraRotation = viewMatrix
             cameraRotation.columns.3 = SIMD4<Float>(0, 0, 0, 1) // カメラの移動成分を消去
@@ -242,7 +237,7 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     }
 }
 
-// SIMD4x4のヘルパーを末尾に追加
+// SIMD4x4のヘルパー
 extension simd_float4x4 {
     init(translation: SIMD3<Float>) {
         self.init(

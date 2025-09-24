@@ -9,6 +9,7 @@ import Combine
 import CoreGraphics
 import simd
 
+// MetalCoordinatorと連携するためのViewModel
 class MetalViewModel: ObservableObject {
     let launchSubject = PassthroughSubject<(FireworkShell2D, SIMD3<Float>), Never>()
     
