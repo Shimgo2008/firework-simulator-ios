@@ -1,6 +1,7 @@
 import SwiftUI
 import RealityKit
 import ARKit
+import ReplayKit
 
 // MARK: - Haptic Feedback Manager
 struct HapticManager {
@@ -29,7 +30,8 @@ struct ARViewScreen: View {
     @State private var isShowingShellListView = false
     @State private var isRecording = false
     @State private var selectedMode: CameraMode = .photo
-    
+    @State private var previewViewController: RPPreviewViewController? = nil
+
     // --- ジェスチャーとUI計算用の状態変数 ---
     @GestureState private var dragOffset: CGFloat = 0
     @State private var currentOffset: CGFloat = 0
@@ -40,6 +42,11 @@ struct ARViewScreen: View {
     // 花火玉リストの管理
     @StateObject private var shellListViewModel = ShellListViewModel()
     @State private var selectedShell: FireworkShell2D?
+
+    // カメラキャプチャ管理
+    private let cameraCapture = CameraCapture()
+    // 画面録画管理
+    private let screenRecorder = ScreenRecorder()
 
     // 設定値
     private let fireworkDistance: Float = 30.0
@@ -238,7 +245,10 @@ struct ARViewScreen: View {
     private var photoShutterButton: some View {
         Button(action: {
             HapticManager.shared.impact()
-            print("📸 写真を撮影しました！")
+            if let arView = arViewRef {
+                cameraCapture.capturePhoto(from: arView)
+            }
+            print("📸 写真を撮影してカメラロールに保存しました！")
         }) {
             ZStack {
                 Circle().stroke(Color.white, lineWidth: 4)
@@ -252,12 +262,29 @@ struct ARViewScreen: View {
         Button(action: {
             HapticManager.shared.impact()
             withAnimation(.spring()) { isRecording.toggle() }
-            
-            if isRecording { print("🔴 録画開始") } else { print("⏹️ 録画停止") }
+            if isRecording {
+                screenRecorder.startRecording { error in
+                    if let error = error {
+                        print("[ScreenRecorder] 録画開始エラー: \(error.localizedDescription)")
+                    } else {
+                        print("[ScreenRecorder] 録画開始")
+                    }
+                }
+            } else {
+                screenRecorder.stopRecording { previewVC, error in
+                    if let error = error {
+                        print("[ScreenRecorder] 録画停止エラー: \(error.localizedDescription)")
+                    } else if let previewVC = previewVC {
+                        print("[ScreenRecorder] 録画完了: プレビュー画面を表示")
+                        previewViewController = previewVC
+                    } else {
+                        print("[ScreenRecorder] 録画完了: プレビュー画面なし")
+                    }
+                }
+            }
         }) {
             ZStack {
                 Circle().stroke(Color.white, lineWidth: 4)
-                
                 if isRecording {
                     RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 25, height: 25)
                 } else {
