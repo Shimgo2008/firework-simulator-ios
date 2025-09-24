@@ -2,7 +2,7 @@
 //  ShellListViewModel.swift
 //  FireWorkSimulator
 //
-//  Created by 岩澤慎平 on 2025/08/16.
+//  Created by shimgo on 2025/08/16.
 //
 
 import SwiftUI

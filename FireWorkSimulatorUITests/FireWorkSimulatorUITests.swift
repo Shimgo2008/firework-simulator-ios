@@ -2,7 +2,7 @@
 //  FireWorkSimulatorUITests.swift
 //  FireWorkSimulatorUITests
 //
-//  Created by 岩澤慎平 on 2025/07/06.
+//  Created by shimgo on 2025/07/06.
 //
 
 import XCTest

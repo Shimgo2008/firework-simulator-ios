@@ -2,7 +2,7 @@
 //  MetalKitData.swift
 //  FireWorkSimulator
 //
-//  Created by 岩澤慎平 on 2025/08/19.
+//  Created by shimgo on 2025/08/19.
 //
 
 import simd
