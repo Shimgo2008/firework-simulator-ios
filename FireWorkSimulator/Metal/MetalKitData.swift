@@ -42,6 +42,11 @@ struct Particle {
     var trailEmissionTimer: Float = .zero
 }
 
+struct ParticleInstance {
+    var modelMatrix: simd_float4x4
+    var color: SIMD4<Float>
+}
+
 // 頂点データを作る関数Particle用に変更
 // makeParticleVertices関数も変更
 func makeParticleVertices(size: Float) -> [Vertex] {

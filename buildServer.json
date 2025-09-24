@@ -12,8 +12,8 @@
 	"argv": [
 		"/opt/homebrew/bin/xcode-build-server"
 	],
-	"workspace": "/Users/shin/Desktop/iPhoneApp/FireWorkSimulator/FireWorkSimulator.xcodeproj/project.xcworkspace",
-	"build_root": "/Users/shin/Library/Developer/Xcode/DerivedData/FireWorkSimulator-ghrmbxqzthhlgygfesdsvbqniald",
+	"workspace": "/Users/shin/Desktop/iPhoneApp/firework-simulator-ios/FireWorkSimulator.xcodeproj/project.xcworkspace",
+	"build_root": "/Users/shin/Library/Developer/Xcode/DerivedData/FireWorkSimulator-cmzmoxxwhkxyhhgvgissmaiqgqie",
 	"scheme": "FireWorkSimulator",
 	"kind": "xcode"
 }
