@@ -5,19 +5,21 @@ import ARKit
 class CameraCapture: NSObject {
     // 写真撮影＆保存
     func capturePhoto(from view: UIView) {
-        // 1. スクリーンショット取得
-        UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, UIScreen.main.scale)
-        view.drawHierarchy(in: view.bounds, afterScreenUpdates: true)
-        let screenshot = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        DispatchQueue.main.async {
+            UIGraphicsBeginImageContextWithOptions(view.bounds.size, false, UIScreen.main.scale)
+            view.drawHierarchy(in: view.bounds, afterScreenUpdates: false)
+            let screenshot = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
 
-        guard let image = screenshot else { return }
+            guard let image = screenshot else { return }
 
-        // 2. 必要ならクロップ（ここでは全体を保存。範囲指定は後で拡張可能）
-        // let croppedImage = cropToCameraArea(image)
+            // 2. 必要ならクロップ（ここでは全体を保存。範囲指定は後で拡張可能）
+            // let croppedImage = cropToCameraArea(image)
 
-        // 3. カメラロールに保存
-        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+            DispatchQueue.global(qos: .userInitiated).async {
+                UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
+            }
+        }
     }
 
     // クロップ処理（必要なら実装）
@@ -45,16 +47,21 @@ class CameraCapture: NSObject {
         }
         session.commitConfiguration()
     }
+
     
     func startRunning() {
-        if !session.isRunning {
-            session.startRunning()
+        DispatchQueue.global(qos: .userInitiated).async {
+            if !self.session.isRunning {
+                self.session.startRunning()
+            }
         }
     }
-    
+
     func stopRunning() {
-        if session.isRunning {
-            session.stopRunning()
+        DispatchQueue.global(qos: .userInitiated).async {
+            if self.session.isRunning {
+                self.session.stopRunning()
+            }
         }
     }
     
@@ -66,3 +73,4 @@ class CameraCapture: NSObject {
         return previewLayer
     }
 }
+

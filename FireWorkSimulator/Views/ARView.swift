@@ -1,6 +1,7 @@
 import SwiftUI
 import RealityKit
 import ARKit
+import ReplayKit
 
 // MARK: - Haptic Feedback Manager
 struct HapticManager {
@@ -29,6 +30,7 @@ struct ARViewScreen: View {
     @State private var isShowingShellListView = false
     @State private var isRecording = false
     @State private var selectedMode: CameraMode = .photo
+    @State private var previewViewController: RPPreviewViewController? = nil
 
     // --- ジェスチャーとUI計算用の状態変数 ---
     @GestureState private var dragOffset: CGFloat = 0
@@ -43,6 +45,8 @@ struct ARViewScreen: View {
 
     // カメラキャプチャ管理
     private let cameraCapture = CameraCapture()
+    // 画面録画管理
+    private let screenRecorder = ScreenRecorder()
 
     // 設定値
     private let fireworkDistance: Float = 30.0
@@ -258,10 +262,26 @@ struct ARViewScreen: View {
         Button(action: {
             HapticManager.shared.impact()
             withAnimation(.spring()) { isRecording.toggle() }
-            cameraCapture.startRunning()
-            // 動画録画処理（CameraCaptureにメソッド追加予定）
-            // if isRecording { cameraCapture.startRecording() } else { cameraCapture.stopRecording() }
-            if isRecording { print("🔴 録画開始") } else { print("⏹️ 録画停止") }
+            if isRecording {
+                screenRecorder.startRecording { error in
+                    if let error = error {
+                        print("[ScreenRecorder] 録画開始エラー: \(error.localizedDescription)")
+                    } else {
+                        print("[ScreenRecorder] 録画開始")
+                    }
+                }
+            } else {
+                screenRecorder.stopRecording { previewVC, error in
+                    if let error = error {
+                        print("[ScreenRecorder] 録画停止エラー: \(error.localizedDescription)")
+                    } else if let previewVC = previewVC {
+                        print("[ScreenRecorder] 録画完了: プレビュー画面を表示")
+                        previewViewController = previewVC
+                    } else {
+                        print("[ScreenRecorder] 録画完了: プレビュー画面なし")
+                    }
+                }
+            }
         }) {
             ZStack {
                 Circle().stroke(Color.white, lineWidth: 4)
