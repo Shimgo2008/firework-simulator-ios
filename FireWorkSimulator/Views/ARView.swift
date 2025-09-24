@@ -48,20 +48,15 @@ struct ARViewScreen: View {
     // 画面録画管理
     private let screenRecorder = ScreenRecorder()
 
-    // 設定値
     private let fireworkDistance: Float = 30.0
 
     var body: some View {
         NavigationView {
             ZStack {
                 GeometryReader { geometry in
-                    // このZStackがARViewとMetalViewを重ねている、画面の本体です
                     ZStack {
-                        // 1️⃣ ARViewを背景に
                         ARViewContainer(arViewRef: $arViewRef, viewModel: viewModel)
                             .edgesIgnoringSafeArea(.all)
-                        
-                        // 2️⃣ MetalViewをオーバーレイ
                         MetalView(viewModel: viewModel)
                             .edgesIgnoringSafeArea(.all)
                     }
@@ -71,16 +66,14 @@ struct ARViewScreen: View {
                                 guard let arView = arViewRef, let shell = selectedShell else { return }
                                 
                                 if let result = arView.raycast(from: value.location, allowing: .estimatedPlane, alignment: .any).first {
-                                    
-                                    // --- ここからが追加・変更ロジック ---
-                                    
+
                                     // 1. タップされたAR空間上の座標を取得
                                     let tappedPosition = result.worldTransform.translation
                                     
                                     // 2. 現在のカメラの位置を取得
                                     let cameraPosition = arView.cameraTransform.matrix.translation
                                     
-                                    // 3. 花火を打ち上げるための最低距離を定義（例: 15メートル）
+                                    // 3. 花火を打ち上げるための最低距離を定義(例: 15メートル)
                                     let minLaunchDistance: Float = 15.0
                                     
                                     // 4. カメラからタップ地点までの距離を計算
@@ -89,7 +82,7 @@ struct ARViewScreen: View {
                                     
                                     var finalLaunchPosition = tappedPosition
                                     
-                                    // 5. もし計算した距離が最低距離より近かった場合...
+                                    // 5. 最低距離より近かった場合
                                     if distance < minLaunchDistance {
                                         // カメラからの方向ベクトルを計算
                                         let direction = normalize(vectorFromCamera)
@@ -98,15 +91,14 @@ struct ARViewScreen: View {
                                         let pushedBackPosition = cameraPosition + direction * minLaunchDistance
                                         
                                         // XとZ座標は新しい位置のものを採用し、
-                                        // Y座標（高さ）は元のタップ地点（地面の高さ）を維持する
+                                        // Y座標(高さ)は元のタップ地点(地面の高さ)を維持する
                                         finalLaunchPosition.x = pushedBackPosition.x
                                         finalLaunchPosition.z = pushedBackPosition.z
                                     }
                                     
                                     // 6. 最終的に決定した打ち上げ位置をViewModelに送信
                                     viewModel.launchSubject.send((shell, finalLaunchPosition))
-                                    
-                                    // --- ここまで ---
+
                                 }
                             }
                     )
@@ -151,13 +143,11 @@ struct ARViewScreen: View {
     }
 
     private var modeSelector: some View {
-        // 各アイテムの幅と間隔を定義
         let itemWidth: CGFloat = 80
         let spacing: CGFloat = 1
 
         let centeringCorrection = (CGFloat(CameraMode.allCases.count - 1) * (itemWidth + spacing)) / 2.0
 
-        // ドラッグジェスチャーの定義
         let dragGesture = DragGesture()
             .updating($dragOffset) { value, state, _ in
                 state = value.translation.width
@@ -214,8 +204,8 @@ struct ARViewScreen: View {
                     videoRecordButton
                 }
             }
-            .id(selectedMode) // モード切り替え時にボタンが再描画されるようにIDを設定
-            .transition(.opacity.combined(with: .scale(scale: 0.8))) // <<<--- ボタンの切り替えアニメーション
+            .id(selectedMode)
+            .transition(.opacity.combined(with: .scale(scale: 0.8)))
             Spacer()
             Rectangle()
                 .fill(Color.clear)
@@ -226,9 +216,8 @@ struct ARViewScreen: View {
 
     private var shellListButton: some View {
         Button(action: { isShowingShellListView = true }) {
-            // selectedShellがnilでなければプレビューを、nilならデフォルトアイコンを表示
             if let shell = selectedShell {
-                FireworkPreview(shell: shell) // 新しく作るプレビュービュー
+                FireworkPreview(shell: shell)
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
@@ -239,7 +228,7 @@ struct ARViewScreen: View {
             }
         }
         .frame(width: 50, height: 50)
-        .clipShape(RoundedRectangle(cornerRadius: 8)) // .clipShapeで形を整える
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     
     private var photoShutterButton: some View {
@@ -296,7 +285,6 @@ struct ARViewScreen: View {
     }
 }
 
-// PreferenceKey for scroll offset detection
 struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {

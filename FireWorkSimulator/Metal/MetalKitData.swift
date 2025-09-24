@@ -58,7 +58,8 @@ func makeParticleVertices(size: Float) -> [Vertex] {
 }
 // MARK: - Helper Functions
 
-/// 3D空間に遠近感を与えるための射影行列（Perspective Projection Matrix）を生成する。
+/// お勉強: https://qiita.com/ryutorion/items/0824a8d6f27564e850c9
+/// 3D空間に遠近感を与えるための射影行列を生成する。
 func makePerspective(fovY: Float, aspect: Float, near: Float, far: Float) -> simd_float4x4 {
     let yScale = 1 / tan(fovY * 0.5)
     let xScale = yScale / aspect
@@ -76,7 +77,7 @@ func makePerspective(fovY: Float, aspect: Float, near: Float, far: Float) -> sim
     )
 }
 
-/// カメラの位置と向きを定義するためのビュー行列（View Matrix）を生成する。
+/// カメラの位置と向きを定義するためのビュー行列(View Matrix)を生成する。
 func makeLookAt(eye: SIMD3<Float>, center: SIMD3<Float>, up: SIMD3<Float>) -> simd_float4x4 {
     let z = normalize(eye - center)
     let x = normalize(cross(up, z))

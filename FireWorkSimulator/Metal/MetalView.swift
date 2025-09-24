@@ -47,6 +47,6 @@ struct MetalView: UIViewRepresentable {
         return mtkView
     }
     
-    /// SwiftUI側の状態が変化してビューが更新されるときに呼ばれる。（今回は使用しない）
+    /// SwiftUI側の状態が変化してビューが更新されるときに呼ばれる。(今回は使用しない)
     func updateUIView(_ uiView: MTKView, context: Context) {}
 }

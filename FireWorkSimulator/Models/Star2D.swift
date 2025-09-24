@@ -29,25 +29,6 @@ struct CodableColor: Codable {
     }
 }
 
-// CoreGraphicsのCGPoint型をCodableにするための拡張
-extension CGPoint: Codable {
-    enum CodingKeys: String, CodingKey {
-        case x, y
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let x = try container.decode(CGFloat.self, forKey: .x)
-        let y = try container.decode(CGFloat.self, forKey: .y)
-        self.init(x: x, y: y)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(x, forKey: .x)
-        try container.encode(y, forKey: .y)
-    }
-}
 
 
 // MARK: - Data Models
@@ -74,7 +55,7 @@ struct Star2D: Identifiable, Codable {
         case id, position, codableColor, shape, size
     }
 
-    /// 新しい星（Star2D）を生成します。
+    /// 新しい星(Star2D)を生成します。
     /// - Parameters:
     ///   - id: 固有のID。デフォルトで自動生成されます。
     ///   - position: キャンバスの中心を(0,0)とした相対座標。
