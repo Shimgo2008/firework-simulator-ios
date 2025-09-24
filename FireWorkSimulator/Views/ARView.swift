@@ -31,6 +31,7 @@ struct ARViewScreen: View {
     @State private var isRecording = false
     @State private var selectedMode: CameraMode = .photo
     @State private var previewViewController: RPPreviewViewController? = nil
+    @State private var isShowingP2PRoomView = false
 
     // --- ジェスチャーとUI計算用の状態変数 ---
     @GestureState private var dragOffset: CGFloat = 0
@@ -115,6 +116,9 @@ struct ARViewScreen: View {
         .sheet(isPresented: $isShowingShellListView) {
             ShellListView(selectedShell: $selectedShell)
         }
+        .sheet(isPresented: $isShowingP2PRoomView) {
+            P2PRoomView()
+        }
     }
 
 
@@ -122,7 +126,7 @@ struct ARViewScreen: View {
 
     private var topBar: some View {
         HStack {
-            Button(action: {}) { Image(systemName: "gear") }
+            Button(action: { isShowingP2PRoomView = true }) { Image(systemName: "person.3.fill") }
             Spacer()
             Button(action: {}) { Image(systemName: "bolt.slash.fill") }
         }
@@ -313,12 +317,5 @@ struct FireworkPreview: View {
                     )
             }
         }
-    }
-}
-
-// MARK: - Preview
-struct ARViewScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        ARViewScreen()
     }
 }
