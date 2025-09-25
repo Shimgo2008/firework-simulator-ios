@@ -21,6 +21,17 @@ struct P2PRoomView: View {
     @State private var mode: Mode = .create // 作成 or 参加
     @State private var availableGroups: [String] = ["花火パーティー", "夏祭り"] // 仮の近くのグループ
 
+    @State private var searchText: String = ""
+    // 検索テキストでフィルタリングされたグループのリスト
+    private var filteredGroups: [String] {
+        if searchText.isEmpty {
+            // 検索テキストが空の場合は、すべてのグループを表示
+            return availableGroups
+        } else {
+            // 大文字・小文字を区別せずに、名前に検索テキストが含まれるものをフィルタリング
+            return availableGroups.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
     enum Mode: String, CaseIterable {
         case create = "作成"
         case join = "参加"
@@ -28,60 +39,66 @@ struct P2PRoomView: View {
     
     var body: some View {
         NavigationView {
-            // 画面全体をタップした時にキーボードを閉じるため、ZStackやColor.clearを使用
-            ZStack {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        isTextFieldFocused = false
-                    }
-                
-                ScrollView {
-                    VStack(spacing: 30) { // spacingを調整
-                        // モード選択
-                        Picker("モード", selection: $mode) {
-                            ForEach(Mode.allCases, id: \.self) { mode in
-                                Text(mode.rawValue).tag(mode)
+            VStack(spacing: 0) {
+                // --- モード選択ピッカー ---
+                CustomModePicker(selectedMode: $mode)
+                    .padding()
+
+                // --- モードに応じたコンテンツ ---
+                if mode == .create {
+                    ScrollView {
+                        VStack {
+                            createGroupSection
+                            if !connectedPeers.isEmpty {
+                                participantsSection.padding(.top, 30)
                             }
                         }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
-                        
-                        if mode == .create {
-                            // グループ作成UI
-                            createGroupSection
-                        } else {
-                            // グループ参加UI
-                            joinGroupSection
-                        }
-                        
-                        // 参加者リスト（共通）
-                        if !connectedPeers.isEmpty {
-                            participantsSection
-                        }
-                        
-                        Spacer()
                     }
-                    .padding(.vertical)
+                } else { // mode == .join
+                    List {
+                        ForEach(filteredGroups, id: \.self) { group in
+                            HStack {
+                                Text(group)
+                                Spacer()
+                                Button("参加") {
+                                    if !connectedPeers.contains(group) {
+                                        connectedPeers.append(group)
+                                    }
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                    .overlay {
+                        if filteredGroups.isEmpty && !searchText.isEmpty {
+                            Text("検索結果がありません")
+                                .foregroundColor(.secondary)
+                        }
+                    }
                 }
+                
+                Spacer()
             }
+            // 1. VStack全体に対して、条件付きでsearchableを適用する
+            .searchableIf(mode == .join, text: $searchText, prompt: "グループを検索")
             .navigationTitle("P2Pグループ管理")
-            // 2. 最新の .toolbar Modifier を使用
             .toolbar {
-                // ナビゲーションバー右上の「完了」ボタン
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("完了") {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
-                
-                // 3. キーボード用のツールバーを追加
                 ToolbarItemGroup(placement: .keyboard) {
-                    Spacer() // ボタンを右寄せにする
+                    Spacer()
                     Button("完了") {
-                        isTextFieldFocused = false // フォーカスを外してキーボードを閉じる
+                        isTextFieldFocused = false
                     }
                 }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                isTextFieldFocused = false
             }
         }
     }
@@ -155,10 +172,56 @@ struct P2PRoomView: View {
         .padding(.horizontal)
     }
 }
+// MARK: - Custom Mode Picker
 
-// MARK: - Preview
-struct P2PRoomView_Previews: PreviewProvider {
-    static var previews: some View {
-        P2PRoomView()
+struct CustomModePicker: View {
+    // 親Viewから受け取る選択中のモード
+    @Binding var selectedMode: P2PRoomView.Mode
+    // アニメーション用の名前空間
+    @Namespace private var animation
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(P2PRoomView.Mode.allCases, id: \.self) { mode in
+                ZStack {
+                    // 選択されているモードの時だけ背景カプセルを表示
+                    if selectedMode == mode {
+                        Capsule()
+                            .fill(Color.blue)
+                            .matchedGeometryEffect(id: "picker_background", in: animation)
+                    }
+
+                    Text(mode.rawValue)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(selectedMode == mode ? .white : .primary)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 40)
+                .contentShape(Capsule()) // タップ領域をカプセルの形に
+                .onTapGesture {
+                    // タップされたら、アニメーション付きで選択モードを更新
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        selectedMode = mode
+                    }
+                }
+            }
+        }
+        .padding(4)
+        .background(
+            Capsule().fill(Color(UIColor.secondarySystemBackground))
+        )
+        .padding(.horizontal)
+    }
+}
+extension View {
+    /// 条件がtrueの場合にのみ、searchableモディファイアを適用する
+    @ViewBuilder
+    func searchableIf(_ condition: Bool, text: Binding<String>, prompt: String) -> some View {
+        if condition {
+            self.searchable(text: text, placement: .navigationBarDrawer(displayMode: .always), prompt: Text(prompt))
+        } else {
+            self
+        }
     }
 }
