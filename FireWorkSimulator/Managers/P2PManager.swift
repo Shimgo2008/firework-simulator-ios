@@ -144,7 +144,6 @@ class P2PManager: NSObject, ObservableObject {
     }
     
     // MARK: - Private Helpers
-    // private var foundPeers: [MCPeerID] = []  // ブラウズで見つけたピア
 }
 
 // MARK: - MCSessionDelegate
