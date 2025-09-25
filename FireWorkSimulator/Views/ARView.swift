@@ -44,6 +44,9 @@ struct ARViewScreen: View {
     @StateObject private var shellListViewModel = ShellListViewModel()
     @State private var selectedShell: FireworkShell2D?
 
+    // P2Pマネージャー
+    @EnvironmentObject var p2pManager: P2PManager
+
     // カメラキャプチャ管理
     private let cameraCapture = CameraCapture()
     // 画面録画管理
@@ -100,9 +103,29 @@ struct ARViewScreen: View {
                                     // 6. 最終的に決定した打ち上げ位置をViewModelに送信
                                     viewModel.launchSubject.send((shell, finalLaunchPosition))
 
+                                    // P2P同期: 相対座標を計算して送信
+                                    if p2pManager.isConnected, let origin = p2pManager.groupOrigin {
+                                        let relativePosition = finalLaunchPosition - origin
+                                        p2pManager.sendFireworkLaunch(shell: shell, relativePosition: relativePosition)
+                                    }
+
                                 }
                             }
                     )
+                    .onReceive(p2pManager.fireworkLaunchSubject) { shell, relativePosition, timestamp in
+                        // P2P受信: 相対座標を絶対座標に変換して発火
+                        if let origin = p2pManager.groupOrigin {
+                            let absolutePosition = origin + relativePosition
+                            viewModel.launchSubject.send((shell, absolutePosition))
+                        }
+                    }
+                    .onChange(of: p2pManager.isConnected) { isConnected in
+                        // 接続時に中点を設定
+                        if isConnected, let arView = arViewRef {
+                            let cameraPosition = arView.cameraTransform.matrix.translation
+                            p2pManager.setGroupOrigin(origin: cameraPosition)
+                        }
+                    }
                 }
                 VStack {
                     topBar
@@ -118,6 +141,7 @@ struct ARViewScreen: View {
         }
         .sheet(isPresented: $isShowingP2PRoomView) {
             P2PRoomView()
+                .environmentObject(p2pManager)
         }
     }
 

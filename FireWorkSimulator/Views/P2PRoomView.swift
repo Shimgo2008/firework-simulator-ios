@@ -10,31 +10,28 @@ import MultipeerConnectivity
 
 struct P2PRoomView: View {
     @Environment(\.presentationMode) var presentationMode
-    
-    // 1. @FocusState を使ってキーボードのフォーカスを管理
     @FocusState private var isTextFieldFocused: Bool
+    
+    // 1. @StateObjectの代わりに@EnvironmentObjectでP2PManagerを受け取る
+    @EnvironmentObject var p2pManager: P2PManager
 
-    // P2Pの状態管理
-    @State private var groupName: String = ""
-    @State private var isHosting = false
-    @State private var connectedPeers: [String] = [] // 参加者リスト（仮）
-    @State private var mode: Mode = .create // 作成 or 参加
-    @State private var availableGroups: [String] = ["花火パーティー", "夏祭り"] // 仮の近くのグループ
+    // --- UI制御用のState ---
+    @State private var groupName: String = "" // グループ名入力用
+    @State private var mode: Mode = .create   // 作成 or 参加 モード
+    @State private var searchText: String = "" // グループ検索用
 
-    @State private var searchText: String = ""
-    // 検索テキストでフィルタリングされたグループのリスト
-    private var filteredGroups: [String] {
-        if searchText.isEmpty {
-            // 検索テキストが空の場合は、すべてのグループを表示
-            return availableGroups
-        } else {
-            // 大文字・小文字を区別せずに、名前に検索テキストが含まれるものをフィルタリング
-            return availableGroups.filter { $0.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
     enum Mode: String, CaseIterable {
         case create = "作成"
         case join = "参加"
+    }
+
+    // 検索テキストでフィルタリングされたグループのリスト
+    private var filteredGroups: [String] {
+        if searchText.isEmpty {
+            return p2pManager.availableGroups
+        } else {
+            return p2pManager.availableGroups.filter { $0.localizedCaseInsensitiveContains(searchText) }
+        }
     }
     
     var body: some View {
@@ -49,7 +46,7 @@ struct P2PRoomView: View {
                     ScrollView {
                         VStack {
                             createGroupSection
-                            if !connectedPeers.isEmpty {
+                            if !p2pManager.connectedPeers.isEmpty || p2pManager.currentGroupName != nil {
                                 participantsSection.padding(.top, 30)
                             }
                         }
@@ -61,11 +58,11 @@ struct P2PRoomView: View {
                                 Text(group)
                                 Spacer()
                                 Button("参加") {
-                                    if !connectedPeers.contains(group) {
-                                        connectedPeers.append(group)
-                                    }
+                                    p2pManager.joinGroup(name: group)
                                 }
                                 .buttonStyle(.bordered)
+                                // 既に接続済みの場合はボタンを無効化
+                                .disabled(p2pManager.currentGroupName != nil)
                             }
                         }
                     }
@@ -77,10 +74,8 @@ struct P2PRoomView: View {
                         }
                     }
                 }
-                
                 Spacer()
             }
-            // 1. VStack全体に対して、条件付きでsearchableを適用する
             .searchableIf(mode == .join, text: $searchText, prompt: "グループを検索")
             .navigationTitle("P2Pグループ管理")
             .toolbar {
@@ -100,7 +95,14 @@ struct P2PRoomView: View {
             .onTapGesture {
                 isTextFieldFocused = false
             }
+            // 2. ビューが表示された時に、既に入力されているグループ名を反映
+            .onAppear {
+                if let name = p2pManager.currentGroupName {
+                    groupName = name
+                }
+            }
         }
+        // 3. .onDisappearでのleaveGroup()呼び出しは削除
     }
     
     // MARK: - Subviews
@@ -112,46 +114,28 @@ struct P2PRoomView: View {
                     .font(.headline)
                 TextField("例: 花火パーティー", text: $groupName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .focused($isTextFieldFocused) // 4. TextFieldにFocusStateを紐付け
+                    .focused($isTextFieldFocused)
+                    // グループ参加中は編集不可に
+                    .disabled(p2pManager.currentGroupName != nil)
             }
             
             Button(action: {
-                isTextFieldFocused = false // ボタンタップ時にもキーボードを閉じる
-                isHosting.toggle()
-                if isHosting {
-                    connectedPeers.append("自分のデバイス")
+                isTextFieldFocused = false
+                if p2pManager.currentGroupName == nil {
+                    guard !groupName.isEmpty else { return }
+                    p2pManager.createGroup(name: groupName)
                 } else {
-                    connectedPeers.removeAll()
+                    p2pManager.leaveGroup()
+                    groupName = ""
                 }
             }) {
-                Text(isHosting ? "グループを閉じる" : "グループを作成")
+                Text(p2pManager.currentGroupName == nil ? "グループを作成" : "グループを閉じる")
                     .font(.title2)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(isHosting ? Color.red : Color.blue)
+                    .background(p2pManager.currentGroupName == nil ? Color.blue : Color.red)
                     .cornerRadius(10)
-            }
-        }
-        .padding(.horizontal)
-    }
-    
-    private var joinGroupSection: some View {
-        VStack(alignment: .leading) {
-            Text("近くのグループ")
-                .font(.headline)
-            ForEach(availableGroups, id: \.self) { group in
-                HStack {
-                    Text(group)
-                    Spacer()
-                    Button("参加") {
-                        // 参加処理（仮）
-                        connectedPeers.append(group)
-                    }
-                }
-                .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(8)
             }
         }
         .padding(.horizontal)
@@ -159,12 +143,19 @@ struct P2PRoomView: View {
     
     private var participantsSection: some View {
         VStack(alignment: .leading) {
-            Text("参加者 (\(connectedPeers.count))")
+            Text("参加者 (\(p2pManager.connectedPeers.count + 1))") // 自分(+1)
                 .font(.headline)
-            ForEach(connectedPeers, id: \.self) { peer in
+            
+            HStack {
+                Image(systemName: "person.circle.fill")
+                Text("自分 (\(UIDevice.current.name))")
+            }
+            .padding(.vertical, 4)
+            
+            ForEach(p2pManager.connectedPeers, id: \.self) { peer in
                 HStack {
                     Image(systemName: "person.circle")
-                    Text(peer)
+                    Text(peer.displayName)
                 }
                 .padding(.vertical, 4)
             }
@@ -172,25 +163,22 @@ struct P2PRoomView: View {
         .padding(.horizontal)
     }
 }
-// MARK: - Custom Mode Picker
+
+// MARK: - Custom UI Components (同梱)
 
 struct CustomModePicker: View {
-    // 親Viewから受け取る選択中のモード
     @Binding var selectedMode: P2PRoomView.Mode
-    // アニメーション用の名前空間
     @Namespace private var animation
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(P2PRoomView.Mode.allCases, id: \.self) { mode in
                 ZStack {
-                    // 選択されているモードの時だけ背景カプセルを表示
                     if selectedMode == mode {
                         Capsule()
                             .fill(Color.blue)
                             .matchedGeometryEffect(id: "picker_background", in: animation)
                     }
-
                     Text(mode.rawValue)
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -198,9 +186,8 @@ struct CustomModePicker: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 40)
-                .contentShape(Capsule()) // タップ領域をカプセルの形に
+                .contentShape(Capsule())
                 .onTapGesture {
-                    // タップされたら、アニメーション付きで選択モードを更新
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                         selectedMode = mode
                     }
@@ -208,14 +195,13 @@ struct CustomModePicker: View {
             }
         }
         .padding(4)
-        .background(
-            Capsule().fill(Color(UIColor.secondarySystemBackground))
-        )
-        .padding(.horizontal)
+        .background(Capsule().fill(Color(UIColor.secondarySystemBackground)))
     }
 }
+
+// MARK: - View Extension (同梱)
+
 extension View {
-    /// 条件がtrueの場合にのみ、searchableモディファイアを適用する
     @ViewBuilder
     func searchableIf(_ condition: Bool, text: Binding<String>, prompt: String) -> some View {
         if condition {
