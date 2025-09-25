@@ -12,20 +12,18 @@ struct P2PRoomView: View {
     @Environment(\.presentationMode) var presentationMode
     @FocusState private var isTextFieldFocused: Bool
     
-    // 1. @StateObjectの代わりに@EnvironmentObjectでP2PManagerを受け取る
     @EnvironmentObject var p2pManager: P2PManager
 
-    // --- UI制御用のState ---
-    @State private var groupName: String = "" // グループ名入力用
-    @State private var mode: Mode = .create   // 作成 or 参加 モード
-    @State private var searchText: String = "" // グループ検索用
+    @State private var groupName: String = ""
+    @State private var mode: Mode = .create
+    @State private var searchText: String = ""
+    @State private var joiningGroup: String? = nil // 参加中のグループ名
 
     enum Mode: String, CaseIterable {
         case create = "作成"
         case join = "参加"
     }
 
-    // 検索テキストでフィルタリングされたグループのリスト
     private var filteredGroups: [String] {
         if searchText.isEmpty {
             return p2pManager.availableGroups
@@ -37,17 +35,22 @@ struct P2PRoomView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                // --- モード選択ピッカー ---
                 CustomModePicker(selectedMode: $mode)
                     .padding()
 
-                // --- モードに応じたコンテンツ ---
                 if mode == .create {
                     ScrollView {
                         VStack {
                             createGroupSection
                             if !p2pManager.connectedPeers.isEmpty || p2pManager.currentGroupName != nil {
                                 participantsSection.padding(.top, 30)
+                            }
+                            // 接続状態を表示
+                            if p2pManager.isConnected {
+                                Text("接続中: \(p2pManager.connectedPeers.count + 1)人")
+                                    .font(.headline)
+                                    .foregroundColor(.green)
+                                    .padding(.top)
                             }
                         }
                     }
@@ -57,12 +60,24 @@ struct P2PRoomView: View {
                             HStack {
                                 Text(group)
                                 Spacer()
-                                Button("参加") {
-                                    p2pManager.joinGroup(name: group)
+                                if p2pManager.currentGroupName == group {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                    Text("参加中")
+                                        .foregroundColor(.green)
+                                } else if joiningGroup == group {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                    Text("参加中...")
+                                        .foregroundColor(.blue)
+                                } else {
+                                    Button("参加") {
+                                        joiningGroup = group
+                                        p2pManager.joinGroup(name: group)
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .disabled(p2pManager.currentGroupName != nil || joiningGroup != nil)
                                 }
-                                .buttonStyle(.bordered)
-                                // 既に接続済みの場合はボタンを無効化
-                                .disabled(p2pManager.currentGroupName != nil)
                             }
                         }
                     }
@@ -71,6 +86,9 @@ struct P2PRoomView: View {
                         if filteredGroups.isEmpty && !searchText.isEmpty {
                             Text("検索結果がありません")
                                 .foregroundColor(.secondary)
+                        } else if p2pManager.isConnected {
+                            Text("既にグループに参加しています")
+                                .foregroundColor(.green)
                         }
                     }
                 }
@@ -95,18 +113,22 @@ struct P2PRoomView: View {
             .onTapGesture {
                 isTextFieldFocused = false
             }
-            // 2. ビューが表示された時に、既に入力されているグループ名を反映
             .onAppear {
                 if let name = p2pManager.currentGroupName {
                     groupName = name
                 }
             }
+            .onChange(of: p2pManager.isConnected) { isConnected in
+                if isConnected {
+                    joiningGroup = nil // 接続成功したらリセット
+                } else if !isConnected && joiningGroup != nil {
+                    // 接続失敗したらリセット（タイムアウトなど）
+                    joiningGroup = nil
+                }
+            }
         }
-        // 3. .onDisappearでのleaveGroup()呼び出しは削除
     }
     
-    // MARK: - Subviews
-
     private var createGroupSection: some View {
         VStack(spacing: 20) {
             VStack(alignment: .leading) {
@@ -115,7 +137,6 @@ struct P2PRoomView: View {
                 TextField("例: 花火パーティー", text: $groupName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .focused($isTextFieldFocused)
-                    // グループ参加中は編集不可に
                     .disabled(p2pManager.currentGroupName != nil)
             }
             
@@ -143,7 +164,7 @@ struct P2PRoomView: View {
     
     private var participantsSection: some View {
         VStack(alignment: .leading) {
-            Text("参加者 (\(p2pManager.connectedPeers.count + 1))") // 自分(+1)
+            Text("参加者 (\(p2pManager.connectedPeers.count + 1))")
                 .font(.headline)
             
             HStack {
@@ -163,8 +184,6 @@ struct P2PRoomView: View {
         .padding(.horizontal)
     }
 }
-
-// MARK: - Custom UI Components (同梱)
 
 struct CustomModePicker: View {
     @Binding var selectedMode: P2PRoomView.Mode
@@ -198,8 +217,6 @@ struct CustomModePicker: View {
         .background(Capsule().fill(Color(UIColor.secondarySystemBackground)))
     }
 }
-
-// MARK: - View Extension (同梱)
 
 extension View {
     @ViewBuilder

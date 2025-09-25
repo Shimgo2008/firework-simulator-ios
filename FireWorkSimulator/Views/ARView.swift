@@ -106,6 +106,7 @@ struct ARViewScreen: View {
                                     // P2P同期: 相対座標を計算して送信
                                     if p2pManager.isConnected, let origin = p2pManager.groupOrigin {
                                         let relativePosition = finalLaunchPosition - origin
+                                        print("[AR] Sending P2P firework: relative \(relativePosition)")
                                         p2pManager.sendFireworkLaunch(shell: shell, relativePosition: relativePosition)
                                     }
 
@@ -116,13 +117,17 @@ struct ARViewScreen: View {
                         // P2P受信: 相対座標を絶対座標に変換して発火
                         if let origin = p2pManager.groupOrigin {
                             let absolutePosition = origin + relativePosition
+                            print("[AR] Received P2P firework: absolute \(absolutePosition)")
                             viewModel.launchSubject.send((shell, absolutePosition))
+                        } else {
+                            print("[AR] No group origin set, ignoring P2P firework")
                         }
                     }
                     .onChange(of: p2pManager.isConnected) { isConnected in
                         // 接続時に中点を設定
                         if isConnected, let arView = arViewRef {
                             let cameraPosition = arView.cameraTransform.matrix.translation
+                            print("[AR] Setting group origin on connect: \(cameraPosition)")
                             p2pManager.setGroupOrigin(origin: cameraPosition)
                         }
                     }
