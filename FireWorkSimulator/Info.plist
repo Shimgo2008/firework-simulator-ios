@@ -6,6 +6,12 @@
 	<array>
 		<dict/>
 	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>P2P花火同期のためにローカルネットワークを使用します。</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_firework-sync._tcp</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>AR体験のためにカメラを使用します。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

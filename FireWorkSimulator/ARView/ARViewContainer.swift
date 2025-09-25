@@ -11,18 +11,38 @@ struct ARViewContainer: UIViewRepresentable {
     
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
+        
+        // ARViewの環境設定を最適化
+        arView.environment.sceneUnderstanding.options = [.occlusion, .physics]
+        
+        
+        // ARWorldTrackingConfigurationの詳細設定
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = [.horizontal, .vertical]
+        configuration.environmentTexturing = .automatic
+        configuration.isLightEstimationEnabled = true
+        
+        // frameSemanticsの設定（サポートされている場合のみ）
+        var supportedSemantics: ARConfiguration.FrameSemantics = []
+        if ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+            supportedSemantics.insert(.sceneDepth)
+        }
+        if ARWorldTrackingConfiguration.supportsFrameSemantics(.smoothedSceneDepth) {
+            supportedSemantics.insert(.smoothedSceneDepth)
+        }
+        configuration.frameSemantics = supportedSemantics
+        
+        // セッションのデリゲートを設定（run前に設定）
+        arView.session.delegate = context.coordinator
+        
+        // セッションを開始
+        arView.session.run(configuration)
+        
+        // 非同期で参照を保存（UI更新のため）
         DispatchQueue.main.async {
             self.arViewRef = arView
         }
         
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.planeDetection = [.horizontal, .vertical]
-        arView.session.run(configuration)
-
-        // ARSessionのデリゲートをCoordinatorに設定
-        arView.session.delegate = context.coordinator
-
-
         return arView
     }
 

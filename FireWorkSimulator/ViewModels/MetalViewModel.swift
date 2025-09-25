@@ -2,7 +2,7 @@
 //  MetalViewModel.swift
 //  FireWorkSimulator
 //
-//  Created by 岩澤慎平 on 2025/08/18.
+//  Created by shimgo on 2025/08/18.
 //
 
 import Combine

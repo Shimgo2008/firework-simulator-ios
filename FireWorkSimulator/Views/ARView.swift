@@ -31,6 +31,7 @@ struct ARViewScreen: View {
     @State private var isRecording = false
     @State private var selectedMode: CameraMode = .photo
     @State private var previewViewController: RPPreviewViewController? = nil
+    @State private var isShowingP2PRoomView = false
 
     // --- ジェスチャーとUI計算用の状態変数 ---
     @GestureState private var dragOffset: CGFloat = 0
@@ -42,6 +43,9 @@ struct ARViewScreen: View {
     // 花火玉リストの管理
     @StateObject private var shellListViewModel = ShellListViewModel()
     @State private var selectedShell: FireworkShell2D?
+
+    // P2Pマネージャー
+    @EnvironmentObject var p2pManager: P2PManager
 
     // カメラキャプチャ管理
     private let cameraCapture = CameraCapture()
@@ -99,9 +103,34 @@ struct ARViewScreen: View {
                                     // 6. 最終的に決定した打ち上げ位置をViewModelに送信
                                     viewModel.launchSubject.send((shell, finalLaunchPosition))
 
+                                    // P2P同期: 相対座標を計算して送信
+                                    if p2pManager.isConnected, let origin = p2pManager.groupOrigin {
+                                        let relativePosition = finalLaunchPosition - origin
+                                        print("[AR] Sending P2P firework: relative \(relativePosition)")
+                                        p2pManager.sendFireworkLaunch(shell: shell, relativePosition: relativePosition)
+                                    }
+
                                 }
                             }
                     )
+                    .onReceive(p2pManager.fireworkLaunchSubject) { shell, relativePosition, timestamp in
+                        // P2P受信: 相対座標を絶対座標に変換して発火
+                        if let origin = p2pManager.groupOrigin {
+                            let absolutePosition = origin + relativePosition
+                            print("[AR] Received P2P firework: absolute \(absolutePosition)")
+                            viewModel.launchSubject.send((shell, absolutePosition))
+                        } else {
+                            print("[AR] No group origin set, ignoring P2P firework")
+                        }
+                    }
+                    .onChange(of: p2pManager.isConnected) { isConnected in
+                        // 接続時に中点を設定
+                        if isConnected, let arView = arViewRef {
+                            let cameraPosition = arView.cameraTransform.matrix.translation
+                            print("[AR] Setting group origin on connect: \(cameraPosition)")
+                            p2pManager.setGroupOrigin(origin: cameraPosition)
+                        }
+                    }
                 }
                 VStack {
                     topBar
@@ -115,6 +144,10 @@ struct ARViewScreen: View {
         .sheet(isPresented: $isShowingShellListView) {
             ShellListView(selectedShell: $selectedShell)
         }
+        .sheet(isPresented: $isShowingP2PRoomView) {
+            P2PRoomView()
+                .environmentObject(p2pManager)
+        }
     }
 
 
@@ -122,7 +155,7 @@ struct ARViewScreen: View {
 
     private var topBar: some View {
         HStack {
-            Button(action: {}) { Image(systemName: "gear") }
+            Button(action: { isShowingP2PRoomView = true }) { Image(systemName: "person.3.fill") }
             Spacer()
             Button(action: {}) { Image(systemName: "bolt.slash.fill") }
         }
@@ -313,12 +346,5 @@ struct FireworkPreview: View {
                     )
             }
         }
-    }
-}
-
-// MARK: - Preview
-struct ARViewScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        ARViewScreen()
     }
 }
