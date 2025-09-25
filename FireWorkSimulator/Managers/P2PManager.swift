@@ -117,6 +117,32 @@ class P2PManager: NSObject, ObservableObject {
         print("[P2P] Set group origin: \(origin)")
     }
     
+    /// P2Pサービスのリロード（広告とブラウズの再開）
+    func reload() {
+        print("[P2P] Reloading P2P services")
+        
+        // 現在の広告とブラウズを停止
+        advertiser.stopAdvertisingPeer()
+        browser.stopBrowsingForPeers()
+        
+        // 広告を再開
+        let discoveryInfo = currentGroupName != nil ? ["groupName": currentGroupName!] : nil
+        advertiser = MCNearbyServiceAdvertiser(peer: myPeerID, discoveryInfo: discoveryInfo, serviceType: serviceType)
+        advertiser.delegate = self
+        advertiser.startAdvertisingPeer()
+        print("[P2P] Restarted advertising")
+        
+        // ブラウズを再開
+        browser = MCNearbyServiceBrowser(peer: myPeerID, serviceType: serviceType)
+        browser.delegate = self
+        browser.startBrowsingForPeers()
+        print("[P2P] Restarted browsing")
+        
+        // グループリストをクリアして再検索
+        availableGroups = []
+        groupToPeerMap = [:]
+    }
+    
     // MARK: - Private Helpers
     // private var foundPeers: [MCPeerID] = []  // ブラウズで見つけたピア
 }

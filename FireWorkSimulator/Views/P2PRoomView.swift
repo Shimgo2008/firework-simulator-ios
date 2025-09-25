@@ -2,7 +2,7 @@
 //  P2PRoomView.swift
 //  FireWorkSimulator
 //
-//  Created by 岩澤慎平 on 2025/09/25.
+//  Created by shimgo on 2025/09/25.
 //
 
 import SwiftUI
@@ -98,8 +98,15 @@ struct P2PRoomView: View {
             .navigationTitle("P2Pグループ管理")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("完了") {
-                        presentationMode.wrappedValue.dismiss()
+                    HStack {
+                        Button(action: {
+                            p2pManager.reload()
+                        }) {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        Button("完了") {
+                            presentationMode.wrappedValue.dismiss()
+                        }
                     }
                 }
                 ToolbarItemGroup(placement: .keyboard) {
