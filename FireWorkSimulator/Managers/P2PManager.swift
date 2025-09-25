@@ -219,7 +219,6 @@ extension P2PManager: MCNearbyServiceAdvertiserDelegate {
 extension P2PManager: MCNearbyServiceBrowserDelegate {
     func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
         print("[P2P] Found peer: \(peerID.displayName), info: \(info ?? [:])")
-        // foundPeers.append(peerID)
         if let groupName = info?["groupName"] {
             availableGroups.append(groupName)
             groupToPeerMap[groupName] = peerID
