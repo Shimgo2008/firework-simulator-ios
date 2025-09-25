@@ -228,7 +228,6 @@ extension P2PManager: MCNearbyServiceBrowserDelegate {
     
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         print("[P2P] Lost peer: \(peerID.displayName)")
-        // foundPeers.removeAll { $0 == peerID }
         // 失われたピアに対応するグループを削除
         for (groupName, peer) in groupToPeerMap {
             if peer == peerID {
