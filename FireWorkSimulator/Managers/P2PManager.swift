@@ -178,22 +178,25 @@ extension P2PManager: MCSessionDelegate {
                let positionArray = dict["position"] as? [Float],
                let timestampInterval = dict["timestamp"] as? TimeInterval {
                 
-                let shell = try! JSONDecoder().decode(FireworkShell2D.self, from: shellData)
-                let position = SIMD3<Float>(positionArray[0], positionArray[1], positionArray[2])
-                let timestamp = Date(timeIntervalSince1970: timestampInterval)
-                
-                print("[P2P] Decoded firework: position \(position), timestamp \(timestamp)")
-                
-                // タイムスタンプまで待って発火
-                let delay = max(0, timestamp.timeIntervalSinceNow)
-                print("[P2P] Scheduling firework launch in \(delay) seconds")
-                
-                // メインスレッドでスケジューリング
-                DispatchQueue.main.async {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                        print("[P2P] Firing received firework")
-                        self.fireworkLaunchSubject.send((shell, position, timestamp))
+                if let shell = try? JSONDecoder().decode(FireworkShell2D.self, from: shellData) {
+                    let position = SIMD3<Float>(positionArray[0], positionArray[1], positionArray[2])
+                    let timestamp = Date(timeIntervalSince1970: timestampInterval)
+                    
+                    print("[P2P] Decoded firework: position \(position), timestamp \(timestamp)")
+                    
+                    // タイムスタンプまで待って発火
+                    let delay = max(0, timestamp.timeIntervalSinceNow)
+                    print("[P2P] Scheduling firework launch in \(delay) seconds")
+                    
+                    // メインスレッドでスケジューリング
+                    DispatchQueue.main.async {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                            print("[P2P] Firing received firework")
+                            self.fireworkLaunchSubject.send((shell, position, timestamp))
+                        }
                     }
+                } else {
+                    print("[P2P] Failed to decode FireworkShell2D from received data")
                 }
             } else {
                 print("[P2P] Failed to decode received data")
