@@ -19,6 +19,7 @@ struct Vertex {
 
 struct Uniforms {
     var mvpMatrix: simd_float4x4
+    var time: Float
 }
 
 struct Particle {
@@ -40,6 +41,10 @@ struct Particle {
     var shellPayload: FireworkShell2D? = nil
     
     var trailEmissionTimer: Float = .zero
+    
+    // Wind resistance and mass for realistic physics
+    var mass: Float = 1.0
+    var windResistance: Float = 0.5
 }
 
 struct ParticleInstance {

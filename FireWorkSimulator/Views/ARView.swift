@@ -46,6 +46,10 @@ struct ARViewScreen: View {
 
     // P2Pマネージャー
     @EnvironmentObject var p2pManager: P2PManager
+    
+    // Weather and sensory effects for Gen Z experience ✨
+    @EnvironmentObject var weatherService: WeatherService
+    @EnvironmentObject var sensoryEffectsManager: SensoryEffectsManager
 
     // カメラキャプチャ管理
     private let cameraCapture = CameraCapture()
@@ -61,8 +65,12 @@ struct ARViewScreen: View {
                     ZStack {
                         ARViewContainer(arViewRef: $arViewRef, viewModel: viewModel)
                             .edgesIgnoringSafeArea(.all)
-                        MetalView(viewModel: viewModel)
-                            .edgesIgnoringSafeArea(.all)
+                        MetalView(
+                            viewModel: viewModel,
+                            sensoryEffectsManager: sensoryEffectsManager,
+                            arViewRef: arViewRef
+                        )
+                        .edgesIgnoringSafeArea(.all)
                     }
                     .gesture(
                         DragGesture(minimumDistance: 0)
@@ -135,6 +143,15 @@ struct ARViewScreen: View {
                 VStack {
                     topBar
                     Spacer()
+                    
+                    // Wind indicator for that authentic weather vibe 🌪️
+                    HStack {
+                        Spacer()
+                        windIndicator
+                            .padding(.trailing)
+                        Spacer()
+                    }
+                    
                     bottomControlArea
                 }
             }
@@ -148,6 +165,12 @@ struct ARViewScreen: View {
             P2PRoomView()
                 .environmentObject(p2pManager)
         }
+        .onAppear {
+            // Set default shell if none selected
+            if selectedShell == nil && !shellListViewModel.shells.isEmpty {
+                selectedShell = shellListViewModel.shells.first
+            }
+        }
     }
 
 
@@ -155,14 +178,60 @@ struct ARViewScreen: View {
 
     private var topBar: some View {
         HStack {
-            Button(action: { isShowingP2PRoomView = true }) { Image(systemName: "person.3.fill") }
+            Button(action: { isShowingP2PRoomView = true }) { 
+                Image(systemName: "person.3.fill") 
+                    .foregroundColor(.white)
+                    .font(.title2)
+            }
+            
             Spacer()
-            Button(action: {}) { Image(systemName: "bolt.slash.fill") }
+            
+            // Weather info for that authentic Gen Z tech vibe 🌡️
+            VStack(alignment: .trailing, spacing: 2) {
+                HStack(spacing: 4) {
+                    Image(systemName: "thermometer")
+                        .font(.caption)
+                    Text("\(Int(weatherService.currentTemperature))°C")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                }
+                HStack(spacing: 4) {
+                    Image(systemName: "waveform")
+                        .font(.caption2)
+                    Text("\(Int(weatherService.soundSpeed))m/s")
+                        .font(.caption2)
+                        .opacity(0.8)
+                }
+            }
+            .foregroundColor(.white)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.white.opacity(0.2), lineWidth: 1)
+                    )
+            )
+            
+            Spacer()
+            
+            Button(action: {}) { 
+                Image(systemName: "bolt.slash.fill")
+                    .foregroundColor(.white)
+                    .font(.title2)
+            }
         }
         .font(.title2)
         .padding()
-        .foregroundColor(.white)
-        .background(Color.black.opacity(0.3))
+        .background(
+            LinearGradient(
+                colors: [.black.opacity(0.4), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
     
     private var bottomControlArea: some View {
@@ -205,9 +274,24 @@ struct ARViewScreen: View {
             }
         
         return ZStack {
+            // Enhanced background with gradient for Gen Z aesthetic ✨
             Capsule()
-                .fill(Color.yellow.opacity(0.3))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            .yellow.opacity(0.4),
+                            .orange.opacity(0.3),
+                            .pink.opacity(0.2)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
                 .frame(width: itemWidth, height: 30)
+                .overlay(
+                    Capsule()
+                        .stroke(.white.opacity(0.3), lineWidth: 1)
+                )
 
             HStack(spacing: spacing) {
                 ForEach(CameraMode.allCases) { mode in
@@ -215,8 +299,12 @@ struct ARViewScreen: View {
                         .font(.subheadline)
                         .fontWeight(.bold)
                         .scaleEffect(selectedMode == mode ? 1.1 : 1.0)
-                        .foregroundColor(selectedMode == mode ? .yellow : .white)
+                        .foregroundColor(selectedMode == mode ? .white : .white.opacity(0.7))
                         .frame(width: itemWidth)
+                        .shadow(
+                            color: selectedMode == mode ? .yellow.opacity(0.5) : .clear,
+                            radius: 4, x: 0, y: 0
+                        )
                 }
             }
             .offset(x: centeringCorrection + currentOffset + dragOffset)
@@ -251,17 +339,76 @@ struct ARViewScreen: View {
         Button(action: { isShowingShellListView = true }) {
             if let shell = selectedShell {
                 FireworkPreview(shell: shell)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.yellow, .orange, .pink],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 2
+                            )
+                    )
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.white, lineWidth: 2)
-                        .background(Color.black.opacity(0.5))
-                    Image(systemName: "sparkles").foregroundColor(.white).font(.title2)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.5), .gray.opacity(0.3)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 2
+                                )
+                        )
+                    
+                    VStack(spacing: 2) {
+                        Image(systemName: "sparkles")
+                            .font(.title3)
+                        Text("花火")
+                            .font(.caption2)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.white)
+                    .shadow(color: .yellow.opacity(0.3), radius: 2, x: 0, y: 0)
                 }
             }
         }
         .frame(width: 50, height: 50)
         .clipShape(RoundedRectangle(cornerRadius: 8))
+        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+    }
+    
+    // MARK: - Wind Indicator for Gen Z Aesthetic
+    
+    private var windIndicator: some View {
+        VStack(spacing: 4) {
+            Image(systemName: "wind")
+                .font(.caption)
+                .foregroundColor(.white)
+                .rotationEffect(.degrees(Double.random(in: -10...10))) // Subtle random rotation for dynamic feel
+                .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: UUID())
+            
+            Text("風")
+                .font(.caption2)
+                .fontWeight(.medium)
+                .foregroundColor(.white.opacity(0.8))
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                )
+        )
+        .shadow(color: .cyan.opacity(0.3), radius: 2, x: 0, y: 0)
     }
     
     private var photoShutterButton: some View {
@@ -273,8 +420,22 @@ struct ARViewScreen: View {
             print("📸 写真を撮影してカメラロールに保存しました！")
         }) {
             ZStack {
-                Circle().stroke(Color.white, lineWidth: 4)
-                Circle().fill(Color.white).padding(6)
+                Circle()
+                    .stroke(.white, lineWidth: 4)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    )
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [.white, .gray.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .padding(6)
+                    .shadow(color: .white.opacity(0.5), radius: 2, x: 0, y: 0)
             }
         }
         .frame(width: 70, height: 70)
@@ -306,15 +467,40 @@ struct ARViewScreen: View {
             }
         }) {
             ZStack {
-                Circle().stroke(Color.white, lineWidth: 4)
+                Circle()
+                    .stroke(.white, lineWidth: 4)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    )
                 if isRecording {
-                    RoundedRectangle(cornerRadius: 4).fill(Color.red).frame(width: 25, height: 25)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(
+                            LinearGradient(
+                                colors: [.red, .pink],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 25, height: 25)
+                        .shadow(color: .red.opacity(0.6), radius: 4, x: 0, y: 0)
                 } else {
-                    Circle().fill(Color.red).frame(width: 58, height: 58)
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [.red, .orange],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 58, height: 58)
+                        .shadow(color: .red.opacity(0.4), radius: 2, x: 0, y: 0)
                 }
             }
         }
         .frame(width: 70, height: 70)
+        .scaleEffect(isRecording ? 1.1 : 1.0)
+        .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: isRecording)
     }
 }
 
@@ -332,18 +518,40 @@ struct FireworkPreview: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.black.opacity(0.8))
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            .black.opacity(0.9),
+                            .gray.opacity(0.6),
+                            .black.opacity(0.9)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                )
 
             let scale = (previewDiameter / 2) / 150.0
             
             ForEach(shell.stars) { star in
                 Circle()
-                    .fill(star.color)
+                    .fill(
+                        RadialGradient(
+                            colors: [star.color, star.color.opacity(0.6)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: star.size * scale * 0.5
+                        )
+                    )
                     .frame(width: star.size * scale, height: star.size * scale)
                     .position(
                         x: 25 + star.position.x * scale, // 50x50のビューの中心に合わせる
                         y: 25 + star.position.y * scale
                     )
+                    .shadow(color: star.color.opacity(0.8), radius: 1, x: 0, y: 0)
             }
         }
     }

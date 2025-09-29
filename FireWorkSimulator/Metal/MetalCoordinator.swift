@@ -3,6 +3,7 @@
 import MetalKit
 import Combine
 import simd
+import ARKit
 
 /// Metalのセットアップ、描画ループ、イベントハンドリングを担当するクラス
 class MetalCoordinator: NSObject, MTKViewDelegate {
@@ -16,10 +17,19 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     private var particles: [Particle] = []
     private let gravity = SIMD3<Float>(0, -2.5, 0)
     
+    // Wind and weather effects for Gen Z sparkle ✨
+    private var windVector = SIMD3<Float>(Float.random(in: -1.0...1.0), 0, Float.random(in: -1.0...1.0))
+    private var windChangeTimer: Float = 0.0
+    private let windChangeInterval: Float = 3.0 // Change wind every 3 seconds for dynamic effects
+    private var soundSpeedMPS: Float = 343.0 // Default sound speed at 20°C
+    private var animationTime: Float = 0.0 // For shader animations
+    
     private var viewModel: MetalViewModel
     private var cancellables = Set<AnyCancellable>()
     
     weak var parentView: MTKView?
+    weak var sensoryEffectsManager: SensoryEffectsManager?
+    weak var arViewRef: ARView?
 
     private var viewMatrix: simd_float4x4 = matrix_identity_float4x4
     private var projectionMatrix: simd_float4x4 = matrix_identity_float4x4
@@ -110,7 +120,10 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
             size: 0.15,
             lifetime: launchDuration,
             type: .riser,
-            shellPayload: shell
+            shellPayload: shell,
+            trailEmissionTimer: 0.0,
+            mass: 2.0, // Heavier riser
+            windResistance: 0.2 // Less affected by wind
         )
         particles.append(riser)
         parentView?.setNeedsDisplay()
@@ -120,6 +133,12 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     private func explode(at position: SIMD3<Float>, shell: FireworkShell2D) -> [Particle] {
         var newStars: [Particle] = []
         let explosionSpeed: Float = 5.0 // 爆発の勢いを調整する定数
+        
+        // Trigger sensory effects based on camera distance 🎆
+        if let arView = arViewRef {
+            let cameraPosition = arView.cameraTransform.matrix.translation
+            sensoryEffectsManager?.triggerExplosionEffects(at: position, cameraPosition: cameraPosition)
+        }
         
         for star2d in shell.stars {
             let baseVelocity = SIMD3<Float>(
@@ -140,7 +159,11 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
                 color: SIMD4<Float>(Float(r), Float(g), Float(b), Float(a)),
                 size: Float(star2d.size / 60.0),
                 lifetime: 2.5,
-                type: .star
+                type: .star,
+                shellPayload: nil,
+                trailEmissionTimer: 0.008,
+                mass: 0.5, // Light stars for wind effect
+                windResistance: 0.8 // Highly affected by wind
             )
             newStars.append(newStar)
         }
@@ -154,6 +177,20 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     func draw(in view: MTKView) {
         let deltaTime: Float = 1.0 / 60.0
         
+        // Update animation time for shader effects
+        animationTime += deltaTime
+        
+        // Update dynamic wind for that Gen Z sparkle ✨
+        windChangeTimer += deltaTime
+        if windChangeTimer >= windChangeInterval {
+            windVector = SIMD3<Float>(
+                Float.random(in: -2.0...2.0), // X wind component
+                Float.random(in: -0.5...0.5), // Slight Y component
+                Float.random(in: -2.0...2.0)  // Z wind component
+            )
+            windChangeTimer = 0.0
+        }
+        
         // --- 物理シミュレーション ---
         var nextFrameParticles: [Particle] = []
         for var particle in particles {
@@ -162,7 +199,16 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
             if particle.lifetime > 0 {
                 // 生きているパーティクルの物理演算
                 if particle.type == .star {
+                    // Apply gravity
                     particle.velocity += gravity * deltaTime
+                    
+                    // Apply wind force based on particle properties 🌪️
+                    let windForce = windVector * particle.windResistance / particle.mass
+                    particle.velocity += windForce * deltaTime
+                    
+                    // Air resistance for realistic motion
+                    let airResistance = particle.velocity * -0.3 * deltaTime
+                    particle.velocity += airResistance
                     
                     particle.trailEmissionTimer -= deltaTime
                     if particle.trailEmissionTimer <= 0{
@@ -172,7 +218,11 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
                             color: particle.color,
                             size: particle.size * 0.5,
                             lifetime: 0.5,
-                            type: .trail
+                            type: .trail,
+                            shellPayload: nil,
+                            trailEmissionTimer: 0.0,
+                            mass: 0.1,
+                            windResistance: 0.9
                         )
                         nextFrameParticles.append(trail)
                         particle.trailEmissionTimer = 0.008
@@ -181,6 +231,15 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
                 
                 if particle.type == .riser{
                     particle.velocity += gravity * deltaTime * 0.1
+                    // Minimal wind effect on risers
+                    let minorWind = windVector * 0.1 * deltaTime
+                    particle.velocity += minorWind
+                }
+                
+                if particle.type == .trail {
+                    // Trails are heavily affected by wind for floating effect
+                    let windForce = windVector * particle.windResistance / particle.mass
+                    particle.velocity += windForce * deltaTime
                 }
 
                 particle.position += particle.velocity * deltaTime
@@ -235,7 +294,7 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         if !instances.isEmpty {
             let instanceBuffer = device.makeBuffer(bytes: instances, length: MemoryLayout<ParticleInstance>.stride * instances.count, options: [])
             
-            var uniforms = Uniforms(mvpMatrix: projectionMatrix * viewMatrix)
+            var uniforms = Uniforms(mvpMatrix: projectionMatrix * viewMatrix, time: animationTime)
             encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
             encoder.setVertexBuffer(instanceBuffer, offset: 0, index: 1)
             encoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 2)
