@@ -14,6 +14,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>AR体験のためにカメラを使用します。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>現在地の気温を取得し、リアルな音響効果を提供するために位置情報を使用します。</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>撮影した写真をカメラロールに保存するために必要です。</string>
 </dict>

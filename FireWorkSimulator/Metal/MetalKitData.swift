@@ -19,6 +19,7 @@ struct Vertex {
 
 struct Uniforms {
     var mvpMatrix: simd_float4x4
+    var time: Float
 }
 
 struct Particle {

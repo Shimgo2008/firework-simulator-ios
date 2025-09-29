@@ -165,6 +165,12 @@ struct ARViewScreen: View {
             P2PRoomView()
                 .environmentObject(p2pManager)
         }
+        .onAppear {
+            // Set default shell if none selected
+            if selectedShell == nil && !shellListViewModel.shells.isEmpty {
+                selectedShell = shellListViewModel.shells.first
+            }
+        }
     }
 
 

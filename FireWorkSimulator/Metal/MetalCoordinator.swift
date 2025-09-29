@@ -22,6 +22,7 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     private var windChangeTimer: Float = 0.0
     private let windChangeInterval: Float = 3.0 // Change wind every 3 seconds for dynamic effects
     private var soundSpeedMPS: Float = 343.0 // Default sound speed at 20°C
+    private var animationTime: Float = 0.0 // For shader animations
     
     private var viewModel: MetalViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -176,6 +177,9 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
     func draw(in view: MTKView) {
         let deltaTime: Float = 1.0 / 60.0
         
+        // Update animation time for shader effects
+        animationTime += deltaTime
+        
         // Update dynamic wind for that Gen Z sparkle ✨
         windChangeTimer += deltaTime
         if windChangeTimer >= windChangeInterval {
@@ -290,7 +294,7 @@ class MetalCoordinator: NSObject, MTKViewDelegate {
         if !instances.isEmpty {
             let instanceBuffer = device.makeBuffer(bytes: instances, length: MemoryLayout<ParticleInstance>.stride * instances.count, options: [])
             
-            var uniforms = Uniforms(mvpMatrix: projectionMatrix * viewMatrix)
+            var uniforms = Uniforms(mvpMatrix: projectionMatrix * viewMatrix, time: animationTime)
             encoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
             encoder.setVertexBuffer(instanceBuffer, offset: 0, index: 1)
             encoder.setVertexBytes(&uniforms, length: MemoryLayout<Uniforms>.stride, index: 2)
