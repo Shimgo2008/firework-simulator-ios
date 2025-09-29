@@ -40,6 +40,10 @@ struct Particle {
     var shellPayload: FireworkShell2D? = nil
     
     var trailEmissionTimer: Float = .zero
+    
+    // Wind resistance and mass for realistic physics
+    var mass: Float = 1.0
+    var windResistance: Float = 0.5
 }
 
 struct ParticleInstance {

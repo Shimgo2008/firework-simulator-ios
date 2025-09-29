@@ -7,11 +7,16 @@
 
 import SwiftUI
 import MetalKit
+import ARKit
 
 /// SwiftUIからMetalKitのMTKViewを利用するためのラッパービュー。
 struct MetalView: UIViewRepresentable {
     
     @ObservedObject var viewModel: MetalViewModel
+    
+    // References for sensory effects and AR integration
+    weak var sensoryEffectsManager: SensoryEffectsManager?
+    weak var arViewRef: ARView?
 
     /// `UIViewRepresentable`に必要なCoordinatorを生成する。
     func makeCoordinator() -> MetalCoordinator {
@@ -43,6 +48,8 @@ struct MetalView: UIViewRepresentable {
         
         // CoordinatorがMTKViewにアクセスできるように参照を渡す
         context.coordinator.parentView = mtkView
+        context.coordinator.sensoryEffectsManager = sensoryEffectsManager
+        context.coordinator.arViewRef = arViewRef
         
         return mtkView
     }
